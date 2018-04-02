@@ -1,8 +1,10 @@
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+from django.db import transaction
 from django.db.models import ProtectedError
 from django.test import TestCase
 
-from mobile_res.models import Coordinates, Report
+from mobile_res.models import Coordinates, Report, Question, Answer
 
 
 class ModelsTestCase(TestCase):
@@ -53,13 +55,19 @@ class ModelsTestCase(TestCase):
 
         # reports
         cls.report1 = Report.objects.create(coordinates=cls.full_coord1,
-                                            intensity=1)
+                                            intensity=1, username='pepito')
 
         cls.report2 = Report.objects.create(coordinates=cls.parc_coord1,
-                                            intensity=12)
+                                            intensity=12, username='juan')
 
         cls.report3 = Report.objects.create(coordinates=cls.parc_coord3,
-                                            intensity=5)
+                                            intensity=5, username='pepito')
+
+        # questions
+        cls.q4 = Question.objects.create(text="cuarta pregunta?", position=4)
+        cls.q1 = Question.objects.create(text="primera pregunta?", position=1)
+        cls.q3 = Question.objects.create(text="tercera pregunta?", position=3)
+        cls.q2 = Question.objects.create(text="segunda pregunta?", position=2)
 
     def test_complete_coords(self):
         # existence
@@ -133,3 +141,45 @@ class ModelsTestCase(TestCase):
         with self.assertRaises(ProtectedError):
             self.full_coord1.delete()
             self.parc_coord1.delete()
+
+    def test_question(self):
+        q0 = Question.objects.create(text='pregunta 0', position=0)
+        questions = Question.objects.all()  # should be gathered in order
+
+        self.assertEqual(questions[3], self.q3)
+        self.assertEqual(questions[2], self.q2)
+        self.assertEqual(questions[0], q0)
+        self.assertEqual(questions[1], self.q1)
+        self.assertEqual(questions[4], self.q4)
+
+        with self.assertRaises(IntegrityError):
+            # add question in same position
+            Question.objects.create(text='other question 1', position=1)
+            Question.objects.create(text='primera pregunta?', position=999)
+
+    def test_answer(self):
+        questions = Question.objects.all()
+        for question in questions:
+            # read question
+            self.assertIsInstance(question.text, str)
+            # answer it
+            Answer.objects.create(
+                text='si',
+                question=question,
+                report=self.report1
+            )
+
+        # try to answer again will raise error
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Answer.objects.create(
+                    text='en verdad no',
+                    question=questions[0],
+                    report=self.report1)
+
+        # but if answer is edited all is ok
+        with transaction.atomic():
+            ans = Answer.objects.get(question=questions[0], report=self.report1)
+        ans.text = 'en verdad no'
+        ans.save()
+        self.assertEqual(ans.text, 'en verdad no')
