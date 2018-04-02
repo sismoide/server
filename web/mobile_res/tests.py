@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models import ProtectedError
 from django.test import TestCase
 
-from mobile_res.models import Coordinates, Report, Question, Answer
+from mobile_res.models import Coordinates, Report, Question, Answer, Emergency, Threat, ThreatReport, EmergencyReport
 
 
 class ModelsTestCase(TestCase):
@@ -68,6 +68,13 @@ class ModelsTestCase(TestCase):
         cls.q1 = Question.objects.create(text="primera pregunta?", position=1)
         cls.q3 = Question.objects.create(text="tercera pregunta?", position=3)
         cls.q2 = Question.objects.create(text="segunda pregunta?", position=2)
+
+        # critic events
+        cls.em_tsunami = Emergency.objects.create(title='Tsunami')
+        cls.em_lahar = Emergency.objects.create(title='Lahar')
+
+        cls.th_grietas = Threat.objects.create(title='Grietas en las estructuras')
+        cls.th_humo = Threat.objects.create(title='Olor a humo')
 
     def test_complete_coords(self):
         # existence
@@ -178,8 +185,62 @@ class ModelsTestCase(TestCase):
                     report=self.report1)
 
         # but if answer is edited all is ok
-        with transaction.atomic():
-            ans = Answer.objects.get(question=questions[0], report=self.report1)
+
+        ans = Answer.objects.get(question=questions[0], report=self.report1)
         ans.text = 'en verdad no'
         ans.save()
         self.assertEqual(ans.text, 'en verdad no')
+
+    def test_threat(self):
+        ThreatReport.objects.create(
+            type=self.th_humo,
+            report=self.report1
+        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                ThreatReport.objects.create(type=self.th_humo,
+                                            report=self.report1)
+
+        ThreatReport.objects.create(
+            type=self.th_grietas,
+            report=self.report1
+        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                ThreatReport.objects.create(type=self.th_grietas,
+                                            report=self.report1
+                                            )
+        with self.assertRaises(ValueError):
+            with transaction.atomic():
+                ThreatReport.objects.create(
+                    type=self.em_lahar,
+                    report=self.report1
+                )
+
+    def test_emergency(self):
+        EmergencyReport.objects.create(
+            type=self.em_lahar,
+            report=self.report1
+        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                EmergencyReport.objects.create(
+                    type=self.em_lahar,
+                    report=self.report1)
+
+        EmergencyReport.objects.create(
+            type=self.em_tsunami,
+            report=self.report1
+        )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                EmergencyReport.objects.create(
+                    type=self.em_tsunami,
+                    report=self.report1
+                )
+        with self.assertRaises(ValueError):
+            with transaction.atomic():
+                EmergencyReport.objects.create(
+                    type=self.th_humo,
+                    report=self.report1
+                )
