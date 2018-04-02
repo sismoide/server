@@ -78,3 +78,48 @@ class Answer(models.Model):
 
     def __str__(self):
         return "{} -> {}".format(self.question, self.text)
+
+
+class Emergency(models.Model):
+    """
+    type of emergency that can be reported.
+    @ title: name of the emergency type
+    """
+    title = models.TextField(unique=True)
+
+
+class Threat(models.Model):
+    """
+    type of threat that can be reported.
+    @ title: name of the threat type
+
+    """
+    title = models.TextField(unique=True)
+
+
+class EventReport(models.Model):
+    """
+    abstract model for any event report that can be attached to the user's report
+    """
+    # have to be define a Type of event
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = (('type', 'report'),)
+        abstract = True
+
+
+class EmergencyReport(EventReport):
+    """
+    emergency report submitted by mobile user.
+    """
+    type = models.ForeignKey(Emergency, on_delete=models.CASCADE)
+
+
+class ThreatReport(EventReport):
+    """
+    threat report submitted by mobile user.
+
+    """
+    type = models.ForeignKey(Threat, on_delete=models.CASCADE)
