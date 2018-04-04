@@ -2,14 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
-# class Quiz(models.Model):
-#     """
-#     set of questions asked to a mobile user when a simple-report is submitted
-#     """
-#     title = models.TextField()
-
-
-class Question(models.Model):
+class IntensityQuestion(models.Model):
     """
     question asked to a mobile user when a quiz is triggered,
     after a simple-report is submitted.
@@ -17,15 +10,13 @@ class Question(models.Model):
     @ position: position in the set of questions that will be asked.
     """
     text = models.TextField(unique=True)  # remove unique if quiz-support is added
-    position = models.IntegerField(unique=True)
-
-    # quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    intensity = models.IntegerField(unique=True)
 
     class Meta:
-        ordering = ['position']
+        ordering = ['intensity']
 
     def __str__(self):
-        return "{}: {}".format(self.position, self.text)
+        return "Intensity {}: {}".format(self.intensity, self.text)
 
 
 class Coordinates(models.Model):
@@ -44,12 +35,14 @@ class Coordinates(models.Model):
 class Report(models.Model):
     """
     report submitted by a mobile app user.
-    @ timestamp: time when report was submitted.
+    @ created_on: time when report instance was submitted.
+    @ modified_on: time when report instance was modified.
     @ coordinates: where the report wes submitted.
     @ intensity: Mercalli's intensity recorded by user.
 
     """
-    timestamp = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now=True)
+    modified_on = models.DateTimeField(auto_now=True)
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
     username = models.TextField()  # todo: auth
@@ -60,24 +53,30 @@ class Report(models.Model):
         super().save(*args, **kwargs)
 
 
-class Answer(models.Model):
-    """
-    user's answer to a question.
-    @ text: answered text
-    @ question: question answered.
-    @ report: user's report related to this answers.
+"""
+answer model is on-hold as intensity will be calculated on-device, 
+then sent to server
+"""
 
-    """
-    text = models.TextField()  # todo: maybe choicefield, check later
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    report = models.ForeignKey(Report, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = (('question', 'report'),)
-
-    def __str__(self):
-        return "{} -> {}".format(self.question, self.text)
+# class Answer(models.Model):
+#     """
+#     user's answer to a question.
+#     @ text: answered text
+#     @ question: question answered.
+#     @ report: user's report related to this answers.
+#
+#     """
+#     text = models.TextField()  # todo: maybe choicefield, check later
+#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+#     report = models.ForeignKey(Report, on_delete=models.CASCADE)
+#     timestamp = models.DateTimeField(auto_now=True)
+#
+#     class Meta:
+#         unique_together = (('question', 'report'),)
+#
+#     def __str__(self):
+#         return "{} -> {}".format(self.question, self.text)
 
 
 class Emergency(models.Model):

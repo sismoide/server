@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models import ProtectedError
 from django.test import TestCase
 
-from mobile_res.models import Coordinates, Report, Question, Answer, Emergency, Threat, ThreatReport, EmergencyReport
+from mobile_res.models import Coordinates, Report, IntensityQuestion, Emergency, Threat, ThreatReport, EmergencyReport
 
 
 class ModelsTestCase(TestCase):
@@ -64,10 +64,10 @@ class ModelsTestCase(TestCase):
                                             intensity=5, username='pepito')
 
         # questions
-        cls.q4 = Question.objects.create(text="cuarta pregunta?", position=4)
-        cls.q1 = Question.objects.create(text="primera pregunta?", position=1)
-        cls.q3 = Question.objects.create(text="tercera pregunta?", position=3)
-        cls.q2 = Question.objects.create(text="segunda pregunta?", position=2)
+        cls.q4 = IntensityQuestion.objects.create(text="cuarta pregunta?", intensity=4)
+        cls.q1 = IntensityQuestion.objects.create(text="primera pregunta?", intensity=1)
+        cls.q3 = IntensityQuestion.objects.create(text="tercera pregunta?", intensity=3)
+        cls.q2 = IntensityQuestion.objects.create(text="segunda pregunta?", intensity=2)
 
         # critic events
         cls.em_tsunami = Emergency.objects.create(title='Tsunami')
@@ -142,16 +142,18 @@ class ModelsTestCase(TestCase):
             Report.objects.create(coordinates=self.full_coord1, intensity=13)
             Report.objects.create(coordinates=self.full_coord1, intensity=-10)
 
-        self.assertIsNotNone(self.report1.timestamp)
-        self.assertIsNotNone(self.report2.timestamp)
+        self.assertIsNotNone(self.report1.created_on)
+        self.assertIsNotNone(self.report2.created_on)
+        self.assertIsNotNone(self.report1.modified_on)
+        self.assertIsNotNone(self.report2.modified_on)
 
         with self.assertRaises(ProtectedError):
             self.full_coord1.delete()
             self.parc_coord1.delete()
 
     def test_question(self):
-        q0 = Question.objects.create(text='pregunta 0', position=0)
-        questions = Question.objects.all()  # should be gathered in order
+        q0 = IntensityQuestion.objects.create(text='pregunta 0', intensity=0)
+        questions = IntensityQuestion.objects.all()  # should be gathered in order
 
         self.assertEqual(questions[3], self.q3)
         self.assertEqual(questions[2], self.q2)
@@ -161,35 +163,9 @@ class ModelsTestCase(TestCase):
 
         with self.assertRaises(IntegrityError):
             # add question in same position
-            Question.objects.create(text='other question 1', position=1)
-            Question.objects.create(text='primera pregunta?', position=999)
+            IntensityQuestion.objects.create(text='other question 1', intensity=1)
+            IntensityQuestion.objects.create(text='primera pregunta?', intensity=999)
 
-    def test_answer(self):
-        questions = Question.objects.all()
-        for question in questions:
-            # read question
-            self.assertIsInstance(question.text, str)
-            # answer it
-            Answer.objects.create(
-                text='si',
-                question=question,
-                report=self.report1
-            )
-
-        # try to answer again will raise error
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                Answer.objects.create(
-                    text='en verdad no',
-                    question=questions[0],
-                    report=self.report1)
-
-        # but if answer is edited all is ok
-
-        ans = Answer.objects.get(question=questions[0], report=self.report1)
-        ans.text = 'en verdad no'
-        ans.save()
-        self.assertEqual(ans.text, 'en verdad no')
 
     def test_threat(self):
         ThreatReport.objects.create(
