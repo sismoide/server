@@ -53,32 +53,6 @@ class Report(models.Model):
         super().save(*args, **kwargs)
 
 
-"""
-answer model is on-hold as intensity will be calculated on-device, 
-then sent to server
-"""
-
-
-# class Answer(models.Model):
-#     """
-#     user's answer to a question.
-#     @ text: answered text
-#     @ question: question answered.
-#     @ report: user's report related to this answers.
-#
-#     """
-#     text = models.TextField()  # todo: maybe choicefield, check later
-#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-#     report = models.ForeignKey(Report, on_delete=models.CASCADE)
-#     timestamp = models.DateTimeField(auto_now=True)
-#
-#     class Meta:
-#         unique_together = (('question', 'report'),)
-#
-#     def __str__(self):
-#         return "{} -> {}".format(self.question, self.text)
-
-
 class Emergency(models.Model):
     """
     type of emergency that can be reported.
