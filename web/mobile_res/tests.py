@@ -3,8 +3,13 @@ from django.db import IntegrityError
 from django.db import transaction
 from django.db.models import ProtectedError
 from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-from mobile_res.models import Coordinates, Report, IntensityQuestion, Emergency, Threat, ThreatReport, EmergencyReport
+from mobile_res.models import Coordinates, Report, IntensityQuestion, EmergencyType, ThreatType, ThreatReport, \
+    EmergencyReport
 
 
 class ModelsTestCase(TestCase):
@@ -55,13 +60,13 @@ class ModelsTestCase(TestCase):
 
         # reports
         cls.report1 = Report.objects.create(coordinates=cls.full_coord1,
-                                            intensity=1, username='pepito')
+                                            intensity=1)
 
         cls.report2 = Report.objects.create(coordinates=cls.parc_coord1,
-                                            intensity=12, username='juan')
+                                            intensity=12)
 
         cls.report3 = Report.objects.create(coordinates=cls.parc_coord3,
-                                            intensity=5, username='pepito')
+                                            intensity=5)
 
         # questions
         cls.q4 = IntensityQuestion.objects.create(text="cuarta pregunta?", intensity=4)
@@ -70,11 +75,11 @@ class ModelsTestCase(TestCase):
         cls.q2 = IntensityQuestion.objects.create(text="segunda pregunta?", intensity=2)
 
         # critic events
-        cls.em_tsunami = Emergency.objects.create(title='Tsunami')
-        cls.em_lahar = Emergency.objects.create(title='Lahar')
+        cls.em_tsunami = EmergencyType.objects.create(title='Tsunami')
+        cls.em_lahar = EmergencyType.objects.create(title='Lahar')
 
-        cls.th_grietas = Threat.objects.create(title='Grietas en las estructuras')
-        cls.th_humo = Threat.objects.create(title='Olor a humo')
+        cls.th_grietas = ThreatType.objects.create(title='Grietas en las estructuras')
+        cls.th_humo = ThreatType.objects.create(title='Olor a humo')
 
     def test_complete_coords(self):
         # existence
@@ -142,6 +147,7 @@ class ModelsTestCase(TestCase):
             Report.objects.create(coordinates=self.full_coord1, intensity=13)
             Report.objects.create(coordinates=self.full_coord1, intensity=-10)
 
+        Report.objects.create(coordinates=self.full_coord1)
         self.assertIsNotNone(self.report1.created_on)
         self.assertIsNotNone(self.report2.created_on)
         self.assertIsNotNone(self.report1.modified_on)
@@ -150,6 +156,13 @@ class ModelsTestCase(TestCase):
         with self.assertRaises(ProtectedError):
             self.full_coord1.delete()
             self.parc_coord1.delete()
+
+        # test timestamps
+        old_date = timezone.datetime(1990, 3, 2, hour=16, minute=20)
+        rep = Report.objects.create(coordinates=self.full_coord1, created_on=old_date)
+        self.assertEqual(old_date, rep.created_on)
+        self.assertLess(old_date.year, rep.modified_on.year
+                        )
 
     def test_question(self):
         q0 = IntensityQuestion.objects.create(text='pregunta 0', intensity=0)
@@ -165,7 +178,6 @@ class ModelsTestCase(TestCase):
             # add question in same position
             IntensityQuestion.objects.create(text='other question 1', intensity=1)
             IntensityQuestion.objects.create(text='primera pregunta?', intensity=999)
-
 
     def test_threat(self):
         ThreatReport.objects.create(
@@ -220,3 +232,76 @@ class ModelsTestCase(TestCase):
                     type=self.th_humo,
                     report=self.report1
                 )
+
+
+class APIResourceTestCase(APITestCase):
+    def test_partial_report(self):
+        """
+        Ensure that can create and patch a report
+        :return:
+        """
+
+        post_url = reverse('mobile_res:report-list')
+
+        # partial data
+        data = {'coordinates': {'latitude': 10, 'longitude': 14}}
+        response = self.client.post(post_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Report.objects.count(), 1)
+
+        # test data integrity
+        rep = Report.objects.all()[0]
+        self.assertIsNone(rep.intensity)
+        self.assertIsNotNone(rep.created_on)
+        self.assertIsNotNone(rep.modified_on)
+        self.assertEqual(rep.created_on.minute, rep.modified_on.minute)
+        past_modified_on = rep.modified_on
+        past_created_on = rep.created_on
+
+        self.assertIsNotNone(rep.coordinates)
+        self.assertEqual(rep.coordinates.latitude, 10)
+        self.assertEqual(rep.coordinates.longitude, 14)
+        # self.assertEqual(rep.created_on.second, rep.modified_on.second)
+        self.assertIsNone(rep.coordinates.elevation)
+        self.assertIsNotNone(rep.modified_on)
+        self.assertNotEqual(rep.created_on, rep.modified_on)
+
+        # suppose now i have the intensity
+        report_id = response.data['id']
+        patch_url = reverse('mobile_res:report-detail', kwargs={'pk': report_id})
+        data = {'intensity': 4}
+        response = self.client.patch(patch_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Report.objects.count(), 1)
+
+        # test data integrity
+        rep = Report.objects.all()[0]
+        self.assertNotEqual(rep.created_on, rep.modified_on)
+        self.assertEqual(rep.created_on, past_created_on)
+        self.assertNotEqual(rep.modified_on, past_modified_on)
+        self.assertEqual(rep.intensity, 4)
+
+        # also old data should stay
+        self.assertIsNotNone(rep.coordinates)
+        self.assertEqual(rep.coordinates.latitude, 10)
+        self.assertEqual(rep.coordinates.longitude, 14)
+        self.assertIsNone(rep.coordinates.elevation)
+        self.assertIsNotNone(rep.modified_on)
+
+        # shouldn't be able to change coordinates
+        data = {'coordinates': {'latitude': 10, 'longitude': 15}}
+        with self.assertRaises(AssertionError):
+            response = self.client.patch(patch_url, data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # shouldn't be able to change dates
+        data = {'created_on': timezone.now()}
+        response = self.client.patch(patch_url, data, format='json')
+
+        data = {'modified_on': timezone.now()}
+        response = self.client.patch(patch_url, data, format='json')
+
+        # partial data
+        data = {'coordinates': {'latitude': -10, 'longitude': -14}}
+        response = self.client.post(post_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
