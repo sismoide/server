@@ -1,5 +1,7 @@
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class IntensityQuestion(models.Model):
@@ -7,7 +9,7 @@ class IntensityQuestion(models.Model):
     question asked to a mobile user when a quiz is triggered,
     after a simple-report is submitted.
     @ text: interrogative text.
-    @ position: position in the set of questions that will be asked.
+    @ intensity: intensity that this question represent.
     """
     text = models.TextField(unique=True)  # remove unique if quiz-support is added
     intensity = models.IntegerField(unique=True)
@@ -15,17 +17,22 @@ class IntensityQuestion(models.Model):
     class Meta:
         ordering = ['intensity']
 
+    def save(self, *args, **kwargs):
+        if self.intensity < 0 or self.intensity > 12:
+            raise ValidationError("intensity out of range, given {}".format(self.intensity))
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return "Intensity {}: {}".format(self.intensity, self.text)
 
 
 class Coordinates(models.Model):
     """
-    latitude and longitude specified in Decimal Degrees (xxx.ddddd)
+    latitude and longitude specified in Decimal Degrees (xxx.ddddddddd)
     elevation specified in Meters above sea.
     """
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(max_digits=13, decimal_places=10)
+    longitude = models.DecimalField(max_digits=13, decimal_places=10)
     elevation = models.FloatField(blank=True, null=True)
 
     def __str__(self):
@@ -41,33 +48,46 @@ class Report(models.Model):
     @ intensity: Mercalli's intensity recorded by user.
 
     """
-    created_on = models.DateTimeField(auto_now=True)
-    modified_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(editable=False, default=timezone.now())
+    modified_on = models.DateTimeField(default=timezone.now())
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
-    username = models.TextField()  # todo: auth
 
     def save(self, *args, **kwargs):
-        if self.intensity < 0 or self.intensity > 12:
-            raise ValidationError("intensity out of range, given {}".format(self.intensity))
+        # at any case cehck constraint
+        if self.intensity:
+            if self.intensity < 0 or self.intensity > 12:
+                raise ValidationError("intensity out of range, given {}".format(self.intensity))
+        # update modified datetime
+        self.modified_on = timezone.now()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return "id:{} in ({}) on {}".format(self.id, self.coordinates, self.created_on)
 
-class Emergency(models.Model):
+
+class EventType(models.Model):
+    title = models.TextField(unique=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.title
+
+
+class EmergencyType(EventType):
     """
     type of emergency that can be reported.
     @ title: name of the emergency type
     """
-    title = models.TextField(unique=True)
 
 
-class Threat(models.Model):
+class ThreatType(EventType):
     """
     type of threat that can be reported.
     @ title: name of the threat type
-
     """
-    title = models.TextField(unique=True)
 
 
 class EventReport(models.Model):
@@ -87,7 +107,7 @@ class EmergencyReport(EventReport):
     """
     emergency report submitted by mobile user.
     """
-    type = models.ForeignKey(Emergency, on_delete=models.CASCADE)
+    type = models.ForeignKey(EmergencyType, on_delete=models.CASCADE)
 
 
 class ThreatReport(EventReport):
@@ -95,4 +115,4 @@ class ThreatReport(EventReport):
     threat report submitted by mobile user.
 
     """
-    type = models.ForeignKey(Threat, on_delete=models.CASCADE)
+    type = models.ForeignKey(ThreatType, on_delete=models.CASCADE)
