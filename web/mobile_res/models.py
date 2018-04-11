@@ -1,7 +1,7 @@
-from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class IntensityQuestion(models.Model):
@@ -48,34 +48,46 @@ class Report(models.Model):
     @ intensity: Mercalli's intensity recorded by user.
 
     """
-    created_on = models.DateTimeField(auto_now_add=True)
-    modified_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(editable=False, default=timezone.now())
+    modified_on = models.DateTimeField(default=timezone.now())
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        # at any case cehck constraint
         if self.intensity:
             if self.intensity < 0 or self.intensity > 12:
                 raise ValidationError("intensity out of range, given {}".format(self.intensity))
-        self.modified_on = datetime.now()
+        # update modified datetime
+        self.modified_on = timezone.now()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return "id:{} in ({}) on {}".format(self.id, self.coordinates, self.created_on)
 
-class EmergencyType(models.Model):
+
+class EventType(models.Model):
+    title = models.TextField(unique=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.title
+
+
+class EmergencyType(EventType):
     """
     type of emergency that can be reported.
     @ title: name of the emergency type
     """
-    title = models.TextField(unique=True)
 
 
-class ThreatType(models.Model):
+class ThreatType(EventType):
     """
     type of threat that can be reported.
     @ title: name of the threat type
-
     """
-    title = models.TextField(unique=True)
 
 
 class EventReport(models.Model):
