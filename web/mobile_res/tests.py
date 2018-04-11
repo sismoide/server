@@ -1,11 +1,10 @@
-import datetime
-
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db import transaction
 from django.db.models import ProtectedError
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -158,6 +157,13 @@ class ModelsTestCase(TestCase):
             self.full_coord1.delete()
             self.parc_coord1.delete()
 
+        # test timestamps
+        old_date = timezone.datetime(1990, 3, 2, hour=16, minute=20)
+        rep = Report.objects.create(coordinates=self.full_coord1, created_on=old_date)
+        self.assertEqual(old_date, rep.created_on)
+        self.assertLess(old_date.year, rep.modified_on.year
+                        )
+
     def test_question(self):
         q0 = IntensityQuestion.objects.create(text='pregunta 0', intensity=0)
         questions = IntensityQuestion.objects.all()  # should be gathered in order
@@ -248,14 +254,14 @@ class APIResourceTestCase(APITestCase):
         self.assertIsNone(rep.intensity)
         self.assertIsNotNone(rep.created_on)
         self.assertIsNotNone(rep.modified_on)
-        # self.assertEqual(rep.created_on, rep.modified_on)
+        self.assertEqual(rep.created_on.minute, rep.modified_on.minute)
         past_modified_on = rep.modified_on
         past_created_on = rep.created_on
 
         self.assertIsNotNone(rep.coordinates)
         self.assertEqual(rep.coordinates.latitude, 10)
         self.assertEqual(rep.coordinates.longitude, 14)
-        self.assertEqual(rep.created_on.second, rep.modified_on.second)
+        # self.assertEqual(rep.created_on.second, rep.modified_on.second)
         self.assertIsNone(rep.coordinates.elevation)
         self.assertIsNotNone(rep.modified_on)
         self.assertNotEqual(rep.created_on, rep.modified_on)
@@ -289,10 +295,10 @@ class APIResourceTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # shouldn't be able to change dates
-        data = {'created_on': "123"}
+        data = {'created_on': timezone.now()}
         response = self.client.patch(patch_url, data, format='json')
 
-        data = {'modified_on': datetime.datetime.now()}
+        data = {'modified_on': timezone.now()}
         response = self.client.patch(patch_url, data, format='json')
 
         # partial data

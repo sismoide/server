@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.utils import timezone
 from rest_framework import serializers
 
 from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport
@@ -13,39 +12,39 @@ class CoordinatesSerializer(serializers.ModelSerializer):
         fields = ('latitude', 'longitude', 'elevation',)
 
 
-class ReportSerializer(serializers.ModelSerializer):
+class ReportCreateSerializer(serializers.ModelSerializer):
     coordinates = CoordinatesSerializer()
     intensity = serializers.IntegerField(required=False)
+    created_on = serializers.DateTimeField(default=timezone.now())
 
     class Meta:
         model = Report
         fields = ('id', 'coordinates', 'intensity', 'created_on')
 
-    def validate_created_on(self, value):
-        print("mish")
-        return value
-
-    def validate(self, attrs):
-        inte = attrs.get('created_on')
-        if inte:
-            print(inte)
-            # raise ValidationError('Cannot update times.')
-
-        return super().validate(attrs)
-
     def create(self, validated_data):
+        # workaround for allowing nested creation of coordinates inside report
         coord_data = validated_data.pop('coordinates')
         coordinates = CoordinatesSerializer.create(CoordinatesSerializer(), validated_data=coord_data)
         try:
             report, created = Report.objects.update_or_create(
                 coordinates=coordinates,
                 intensity=validated_data.pop('intensity'),
-                modified_on=datetime.now())
+                modified_on=timezone.now(),
+                created_on=validated_data.pop('created_on'))
         except KeyError:
             report, created = Report.objects.update_or_create(
                 coordinates=coordinates,
-                modified_on=datetime.now())
+                modified_on=timezone.now(),
+                created_on=validated_data.pop('created_on'))
         return report
+
+
+class ReportPatchSerializer(serializers.ModelSerializer):
+    intensity = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Report
+        fields = ('id', 'intensity')
 
 
 class EmergencyReportSerializer(serializers.ModelSerializer):
