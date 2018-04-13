@@ -55,6 +55,7 @@ class Report(models.Model):
 
     def save(self, *args, **kwargs):
         self.modified_on = timezone.now()
+
         # at any case cehck constraint
         if self.intensity:
             if self.intensity < 0 or self.intensity > 12:
