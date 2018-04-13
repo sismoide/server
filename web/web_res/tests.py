@@ -1,13 +1,15 @@
 import datetime as dt
 
+from django.contrib.auth.models import User
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from mobile_res.models import Report, Coordinates
-
-
 # Create your tests here.
+from web_res.models import WebUser
+
 
 class ReportTests(APITestCase):
 
@@ -55,3 +57,17 @@ class ReportTests(APITestCase):
         response = self.client.get(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
+
+
+class WebUserTest(TestCase):
+    def test_creation(self):
+        WebUser.objects.create_web_user('juan', password='juanito_123')
+        self.assertIsNotNone(WebUser.objects.get(user__username='juan'))
+        du1 = User.objects.get(username='juan')
+        self.assertIsNotNone(du1)
+        self.assertIsNotNone(du1.password)
+        self.assertEqual("", du1.email)
+
+        du1.delete()
+        with self.assertRaises(WebUser.DoesNotExist):
+            WebUser.objects.get(user__username='juan')
