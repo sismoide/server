@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from mobile_res.models import Report, Coordinates
@@ -61,9 +62,15 @@ class ReportTests(APITestCase):
 
 class WebUserTest(TestCase):
     def test_creation(self):
-        WebUser.objects.create_web_user('juan', password='juanito_123')
+        wu1 = WebUser.objects.create_web_user('juan', password='juanito_123')
         self.assertIsNotNone(WebUser.objects.get(user__username='juan'))
+        self.assertIsNotNone(wu1.token)
+        self.assertIsInstance(wu1.token, Token)
+
         du1 = User.objects.get(username='juan')
+        self.assertFalse(du1.check_password('juan'))
+        self.assertTrue(du1.check_password('juanito_123'))
+
         self.assertIsNotNone(du1)
         self.assertIsNotNone(du1.password)
         self.assertEqual("", du1.email)
