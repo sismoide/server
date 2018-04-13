@@ -54,12 +54,13 @@ class Report(models.Model):
     intensity = models.IntegerField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        self.modified_on = timezone.now()
+
         # at any case cehck constraint
         if self.intensity:
             if self.intensity < 0 or self.intensity > 12:
                 raise ValidationError("intensity out of range, given {}".format(self.intensity))
         # update modified datetime
-        self.modified_on = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):
