@@ -29,5 +29,4 @@ class WebUser(models.Model):
     def save(self, *args, **kwargs):
         if self.token is "" or self.token is None:
             self.token = Token.objects.get_or_create(user=self.user)[0]
-        print(self.token)
         super().save(*args, **kwargs)
