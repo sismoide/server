@@ -7,8 +7,7 @@ class WebUserManager(models.Manager):
 
     def create_web_user(self, name, email=None, password=None):
         django_user = User.objects.create_user(name, email, password)
-        token = Token.objects.create(user=django_user)
-        web_user = WebUser.objects.create(user=django_user, token=token)
+        web_user = WebUser.objects.create(user=django_user)
         return web_user
 
 
@@ -24,5 +23,11 @@ class WebUser(models.Model):
         User.objects.create_user(name, email, plain_pass)
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    token = models.TextField()
+    token = models.TextField(blank=True)
     objects = WebUserManager()
+
+    def save(self, *args, **kwargs):
+        if self.token is "" or self.token is None:
+            self.token = Token.objects.get_or_create(user=self.user)[0]
+        print(self.token)
+        super().save(*args, **kwargs)

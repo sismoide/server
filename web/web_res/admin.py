@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from web_res.models import WebUser
+
+admin.site.register(WebUser)
