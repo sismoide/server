@@ -68,12 +68,15 @@ class WebUserTest(TestCase):
         self.assertIsInstance(wu1.token, Token)
 
         du1 = User.objects.get(username='juan')
+        with self.assertRaises(User.DoesNotExist):
+            User.objects.get(username='pepito')
         self.assertFalse(du1.check_password('juan'))
         self.assertTrue(du1.check_password('juanito_123'))
 
         self.assertIsNotNone(du1)
         self.assertIsNotNone(du1.password)
         self.assertEqual("", du1.email)
+        self.assertIsNotNone(wu1.token)
 
         du1.delete()
         with self.assertRaises(WebUser.DoesNotExist):
