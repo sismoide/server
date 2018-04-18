@@ -158,8 +158,6 @@ class ModelsTestCase(TestCase):
         self.assertLess(old_date.year, rep.modified_on.year
                         )
 
-
-
     def test_threat(self):
         ThreatReport.objects.create(
             type=self.th_humo,

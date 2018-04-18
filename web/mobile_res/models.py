@@ -15,7 +15,8 @@ class Coordinates(models.Model):
     elevation = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return "{}, {} [{} m]".format(self.latitude, self.longitude, self.elevation) if self.elevation else "{}, {}".format(self.latitude, self.longitude)
+        return "{}, {} [{} m]".format(self.latitude, self.longitude, self.elevation) if self.elevation \
+            else "{}, {}".format(self.latitude, self.longitude)
 
     def distance(self, other_coordinates):
         """
