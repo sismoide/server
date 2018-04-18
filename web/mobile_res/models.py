@@ -1,29 +1,8 @@
+import math
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-
-
-class IntensityQuestion(models.Model):
-    """
-    question asked to a mobile user when a quiz is triggered,
-    after a simple-report is submitted.
-    @ text: interrogative text.
-    @ intensity: intensity that this question represent.
-    """
-    text = models.TextField(unique=True)  # remove unique if quiz-support is added
-    intensity = models.IntegerField(unique=True)
-
-    class Meta:
-        ordering = ['intensity']
-
-    def save(self, *args, **kwargs):
-        if self.intensity < 0 or self.intensity > 12:
-            raise ValidationError("intensity out of range, given {}".format(self.intensity))
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return "Intensity {}: {}".format(self.intensity, self.text)
 
 
 class Coordinates(models.Model):
@@ -36,7 +15,20 @@ class Coordinates(models.Model):
     elevation = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return "{}, {} [{} m]".format(self.latitude, self.longitude, self.elevation) if self.elevation else "{}, {}".format(self.latitude, self.longitude)
+        return "{}, {} [{} m]".format(self.latitude, self.longitude, self.elevation) if self.elevation \
+            else "{}, {}".format(self.latitude, self.longitude)
+
+    def distance(self, other_coordinates):
+        """
+        Calculate distance between 2 coordinates.
+        :param other_coordinates: Coordinates instance that are comparing with.
+        :return: cartesian distance
+        """
+        # pythagoras's theorem
+        return math.sqrt(
+            (other_coordinates.latitude - self.latitude) ^ 2 +
+            (other_coordinates.longitude - self.longitude) ^ 2
+        )
 
 
 class Report(models.Model):
@@ -54,13 +46,12 @@ class Report(models.Model):
     intensity = models.IntegerField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        self.modified_on = timezone.now()
-
         # at any case cehck constraint
         if self.intensity:
             if self.intensity < 0 or self.intensity > 12:
                 raise ValidationError("intensity out of range, given {}".format(self.intensity))
         # update modified datetime
+        self.modified_on = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):
