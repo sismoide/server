@@ -8,7 +8,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from mobile_res.models import Coordinates, Report, IntensityQuestion, EmergencyType, ThreatType, ThreatReport, \
+from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
     EmergencyReport
 
 
@@ -67,12 +67,6 @@ class ModelsTestCase(TestCase):
 
         cls.report3 = Report.objects.create(coordinates=cls.parc_coord3,
                                             intensity=5)
-
-        # questions
-        cls.q4 = IntensityQuestion.objects.create(text="cuarta pregunta?", intensity=4)
-        cls.q1 = IntensityQuestion.objects.create(text="primera pregunta?", intensity=1)
-        cls.q3 = IntensityQuestion.objects.create(text="tercera pregunta?", intensity=3)
-        cls.q2 = IntensityQuestion.objects.create(text="segunda pregunta?", intensity=2)
 
         # critic events
         cls.em_tsunami = EmergencyType.objects.create(title='Tsunami')
@@ -163,21 +157,6 @@ class ModelsTestCase(TestCase):
         self.assertEqual(old_date, rep.created_on)
         self.assertLess(old_date.year, rep.modified_on.year
                         )
-
-    def test_question(self):
-        q0 = IntensityQuestion.objects.create(text='pregunta 0', intensity=0)
-        questions = IntensityQuestion.objects.all()  # should be gathered in order
-
-        self.assertEqual(questions[3], self.q3)
-        self.assertEqual(questions[2], self.q2)
-        self.assertEqual(questions[0], q0)
-        self.assertEqual(questions[1], self.q1)
-        self.assertEqual(questions[4], self.q4)
-
-        with self.assertRaises(IntegrityError):
-            # add question in same position
-            IntensityQuestion.objects.create(text='other question 1', intensity=1)
-            IntensityQuestion.objects.create(text='primera pregunta?', intensity=999)
 
     def test_threat(self):
         ThreatReport.objects.create(
