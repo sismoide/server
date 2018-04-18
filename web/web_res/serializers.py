@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport, EmergencyType, ThreatType
 
+from mobile_res.models import Report, Coordinates
+
 
 class CoordinatesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,6 +17,16 @@ class IntensitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ('intensity', 'coordinates', 'created_on')
+
+
+class WebUserChangePasswordSerializer(serializers.Serializer):
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+    password = serializers.CharField(min_length=8)
 
 
 class EmergencyTypeSerializer(serializers.ModelSerializer):

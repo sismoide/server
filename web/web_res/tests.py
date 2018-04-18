@@ -129,24 +129,32 @@ class EmergencyTests(APITestCase):
         self.assertEqual(len(response.data), 0)
 
 
-class WebUserTest(TestCase):
-	def test_creation(self):
-		wu1 = WebUser.objects.create_web_user('juan', password='juanito_123')
-		self.assertIsNotNone(WebUser.objects.get(user__username='juan'))
-		self.assertIsNotNone(wu1.token)
-		self.assertIsInstance(wu1.token, Token)
+class WebUserTest(APITestCase, TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.wu1 = WebUser.objects.create_web_user('juan', password='juanito_123')
 
-		du1 = User.objects.get(username='juan')
-		with self.assertRaises(User.DoesNotExist):
-			User.objects.get(username='pepito')
-		self.assertFalse(du1.check_password('juan'))
-		self.assertTrue(du1.check_password('juanito_123'))
+    def test_creation(self):
+        self.assertIsNotNone(WebUser.objects.get(user__username='juan'))
+        self.assertIsNotNone(self.wu1.token)
+        self.assertIsInstance(self.wu1.token, Token)
 
-		self.assertIsNotNone(du1)
-		self.assertIsNotNone(du1.password)
-		self.assertEqual("", du1.email)
-		self.assertIsNotNone(wu1.token)
+        du1 = User.objects.get(username='juan')
+        with self.assertRaises(User.DoesNotExist):
+            User.objects.get(username='pepito')
+        self.assertFalse(du1.check_password('juan'))
+        self.assertTrue(du1.check_password('juanito_123'))
 
-		du1.delete()
-		with self.assertRaises(WebUser.DoesNotExist):
-			WebUser.objects.get(user__username='juan')
+        self.assertIsNotNone(du1)
+        self.assertIsNotNone(du1.password)
+        self.assertEqual("", du1.email)
+        self.assertIsNotNone(self.wu1.token)
+
+        du1.delete()
+        with self.assertRaises(WebUser.DoesNotExist):
+            WebUser.objects.get(user__username='juan')
+
+    def test_modify_password(self):
+        # probado a mano
+        pass
