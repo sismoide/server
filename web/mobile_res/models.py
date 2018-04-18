@@ -1,4 +1,5 @@
 import math
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -107,3 +108,15 @@ class ThreatReport(EventReport):
 
     """
     type = models.ForeignKey(ThreatType, on_delete=models.CASCADE)
+
+
+# Auth
+NONCE_TIMEOUT = 60 * 10
+
+
+class Nonce(models.Model):
+    """
+    Cryptographic Nonce
+    """
+    key = models.TextField(default=uuid.uuid4().hex + uuid.uuid1().hex)
+    created_on = models.DateTimeField(editable=False, default=timezone.now())

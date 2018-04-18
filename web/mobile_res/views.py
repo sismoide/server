@@ -1,4 +1,5 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, permissions
+from rest_framework.generics import GenericAPIView
 
 from mobile_res.models import Report, EmergencyReport, ThreatReport
 from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerializer, ThreatReportSerializer, \
@@ -32,3 +33,10 @@ class ThreatReportViewSet(mixins.CreateModelMixin,
                           viewsets.GenericViewSet):
     queryset = ThreatReport.objects.all()
     serializer_class = ThreatReportSerializer
+
+
+class GetNonce(GenericAPIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get_queryset(self):
+        return
