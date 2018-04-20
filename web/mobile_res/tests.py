@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db import transaction
@@ -284,3 +286,25 @@ class APIResourceTestCase(APITestCase):
         data = {'coordinates': {'latitude': -10, 'longitude': -14}}
         response = self.client.post(post_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class UuidTestCase(TestCase):
+    def test_uuid1_unicity(self):
+        iterations = 1000
+        hexes = []
+
+        for i in range(iterations):
+            hexes.append(uuid.uuid1().hex)
+
+        hexes_set = set(hexes)
+        self.assertEqual(len(hexes), len(hexes_set))
+
+    def test_uuid4_unicity(self):
+        iterations = 1000
+        hexes = []
+
+        for i in range(iterations):
+            hexes.append(uuid.uuid4().hex)
+
+        hexes_set = set(hexes)
+        self.assertEqual(len(hexes), len(hexes_set))
