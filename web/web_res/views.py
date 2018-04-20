@@ -1,6 +1,5 @@
 import datetime as dt
 
-# Create your views here.
 from rest_framework import mixins, viewsets, permissions, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -52,10 +51,6 @@ class ThreatList(mixins.ListModelMixin, viewsets.GenericViewSet):
         queryset = self.get_queryset().filter(report__created_on__range=getdates(request))
         serializer = ThreatSerializer(queryset, many=True)
         return Response(serializer.data)
-
-
-class NonceViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset =
 
 
 class WebUserChangePassword(GenericAPIView):

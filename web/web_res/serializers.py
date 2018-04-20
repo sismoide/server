@@ -62,3 +62,7 @@ class NonceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nonce
         fields = ('key',)
+
+
+class ChallengeSerializer(serializers.Serializer):
+    h = serializers.CharField()

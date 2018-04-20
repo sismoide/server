@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
+import hashlib
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -126,10 +126,12 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        # 'rest_framework.permissions.IsAuthenticated', todo: habilitar cuando haya forma de autenticar todo
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     )
 }
+
+NONCE_EXPIRATION_TIME = 30 * 10  # in seconds
+HASH_CLASS = hashlib.sha256  # have to implement '.hexdigest()' method.

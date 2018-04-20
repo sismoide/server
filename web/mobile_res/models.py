@@ -1,9 +1,47 @@
+import datetime
 import math
 import uuid
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
+
+from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
+
+
+class MobileUserManager(models.Manager):
+    def create_random_mobile_user(self):
+        # generate random user & password
+        django_user = User.objects.create_user(str(uuid.uuid5(uuid.uuid4(), "django:user")))
+        django_user.set_password(User.objects.make_random_password())
+        django_user.save()
+        return MobileUser.objects.create(user=django_user)
+
+
+class MobileUser(models.Model):
+    """
+    Django's user has:
+        username
+        password
+        email
+        first_name
+        last_name
+    Django's user is created by:
+        User.objects.create_user(name, email, plain_pass)
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    token = models.OneToOneField(Token, null=True, blank=True, on_delete=models.SET_NULL)
+    objects = MobileUserManager()
+
+    def save(self, *args, **kwargs):
+        if self.token is "" or self.token is None:
+            self.token = Token.objects.get_or_create(user=self.user)[0]
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.user)
 
 
 class Coordinates(models.Model):
@@ -112,12 +150,27 @@ class ThreatReport(EventReport):
 
 
 # Auth
-NONCE_TIMEOUT = 60 * 10
+
+def clean_expired_nonces():
+    timeout_limit_time = timezone.now() - datetime.timedelta(seconds=NONCE_EXPIRATION_TIME)
+    n = Nonce.objects.filter(created_on__lt=timeout_limit_time)
+    n.delete()
 
 
 class Nonce(models.Model):
     """
     Cryptographic Nonce
     """
-    key = models.TextField(default=uuid.uuid4().hex + uuid.uuid1().hex)
-    created_on = models.DateTimeField(editable=False, default=timezone.now())
+    key = models.TextField(null=True, blank=True)
+    expected_response = models.TextField(null=True, blank=True)
+    created_on = models.DateTimeField(null=True, blank=True)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        clean_expired_nonces()  # maybe is too demanding
+        if not self.pk:
+            self.key = uuid.uuid1().hex + uuid.uuid4().hex
+            self.created_on = timezone.now()
+            # calculate hash of key + secret (None by now)
+            self.expected_response = HASH_CLASS(self.key.encode('utf-8')).hexdigest()
+        super().save(force_insert, force_update, using, update_fields)
