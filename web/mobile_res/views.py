@@ -54,7 +54,6 @@ class ValidateChallengeAPIView(GenericAPIView):
     serializer_class = ChallengeSerializer
     permission_classes = (AllowAny,)
 
-
     def get_queryset(self):
         return
 
