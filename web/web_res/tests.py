@@ -7,9 +7,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from mobile_res.models import Report, Coordinates, EmergencyType, EmergencyReport
-
-
+from mobile_res.models import EmergencyType, EmergencyReport
 from mobile_res.models import Report, Coordinates
 # Create your tests here.
 from web_res.models import WebUser
@@ -20,6 +18,7 @@ class ReportTests(APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.token = WebUser.objects.create_web_user('test_user').token
 
         # full coords
         cls.full_coord1 = Coordinates.objects.create(
@@ -50,7 +49,7 @@ class ReportTests(APITestCase):
     def test_get_reports(self):
         url = reverse('web_res:report-list')
         data = {'start': '2018-01-01T00:00', 'end': '2018-12-31T00:00'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
@@ -58,7 +57,7 @@ class ReportTests(APITestCase):
     def test_invalid_filter(self):
         url = reverse('web_res:report-list')
         data = {'start': '2018-01-01T00:00', 'end': '2017-01-01T00:00'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
@@ -68,6 +67,7 @@ class EmergencyTests(APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.token = WebUser.objects.create_web_user('test_user').token
 
         # full coords
         cls.full_coord1 = Coordinates.objects.create(
@@ -116,7 +116,7 @@ class EmergencyTests(APITestCase):
     def test_get_reports(self):
         url = reverse('web_res:emergencyreport-list')
         data = {'start': '2018-01-01T00:00', 'end': '2018-12-31T00:00'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
@@ -124,7 +124,7 @@ class EmergencyTests(APITestCase):
     def test_invalid_filter(self):
         url = reverse('web_res:emergencyreport-list')
         data = {'start': '2018-01-01T00:00', 'end': '2017-01-01T00:00'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 

@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport
+    EmergencyReport, MobileUser
 
 
 class ModelsTestCase(TestCase):
@@ -214,6 +214,11 @@ class ModelsTestCase(TestCase):
 
 
 class APIResourceTestCase(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.token = MobileUser.objects.create_random_mobile_user().token
+
     def test_partial_report(self):
         """
         Ensure that can create and patch a report
@@ -224,7 +229,11 @@ class APIResourceTestCase(APITestCase):
 
         # partial data
         data = {'coordinates': {'latitude': 10, 'longitude': 14}}
+        # test post without key
         response = self.client.post(post_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.post(post_url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Report.objects.count(), 1)
 
@@ -249,7 +258,12 @@ class APIResourceTestCase(APITestCase):
         report_id = response.data['id']
         patch_url = reverse('mobile_res:report-detail', kwargs={'pk': report_id})
         data = {'intensity': 4}
+        # try without token
         response = self.client.patch(patch_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # with token
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Report.objects.count(), 1)
 
@@ -270,17 +284,32 @@ class APIResourceTestCase(APITestCase):
         # shouldn't be able to change coordinates
         data = {'coordinates': {'latitude': 10, 'longitude': 15}}
         with self.assertRaises(AssertionError):
-            response = self.client.patch(patch_url, data, format='json')
+            response = self.client.patch(patch_url, data, format='json',
+                                         HTTP_AUTHORIZATION="Token {}".format(self.token.key))
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # shouldn't be able to change dates
-        data = {'created_on': timezone.now()}
-        response = self.client.patch(patch_url, data, format='json')
+        new_time = timezone.now()
+        data = {'created_on': new_time}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).created_on)
 
-        data = {'modified_on': timezone.now()}
-        response = self.client.patch(patch_url, data, format='json')
+        new_time = timezone.now()
+        data = {'modified_on': new_time}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).modified_on)
+
+        new_time = timezone.now()
+        data = {'created_on': new_time, 'modified_on': new_time}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).modified_on)
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).created_on)
 
         # partial data
         data = {'coordinates': {'latitude': -10, 'longitude': -14}}
-        response = self.client.post(post_url, data, format='json')
+        response = self.client.post(post_url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+

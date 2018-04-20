@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport, EmergencyType, ThreatType
-
+from mobile_res.models import EmergencyReport, ThreatReport, EmergencyType, ThreatType, Nonce
 from mobile_res.models import Report, Coordinates
 
 
@@ -57,3 +56,13 @@ class ThreatSerializer(serializers.ModelSerializer):
     class Meta:
         model = ThreatReport
         fields = ('type', 'report', 'timestamp')
+
+
+class NonceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Nonce
+        fields = ('key',)
+
+
+class ChallengeSerializer(serializers.Serializer):
+    h = serializers.CharField()
