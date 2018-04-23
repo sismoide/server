@@ -4,7 +4,7 @@ from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
 from mobile_res.models import Report, EmergencyReport, ThreatReport
-from web_res.serializers import IntensitySerializer, EmergencySerializer, ThreatSerializer
+from web_res.serializers import ReportSerializer, EmergencySerializer, ThreatSerializer
 
 
 # Create your views here.
@@ -24,11 +24,11 @@ def getdates(request):
 
 class ReportList(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Report.objects.all()
-    serializer_class = IntensitySerializer
+    serializer_class = ReportSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(created_on__range=getdates(request))
-        serializer = IntensitySerializer(queryset, many=True)
+        serializer = ReportSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
