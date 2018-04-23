@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 
 from mobile_res.models import Report, EmergencyReport, ThreatReport
@@ -40,7 +40,6 @@ class ThreatReportViewSet(mixins.CreateModelMixin,
 
 def get_limits(request):
     # in kilometers
-    #radius = 200.0
     radius = float(request.query_params.get('rad', "10.0"))
 
     # length of 1 degree at the equator (latitude and longitude)
@@ -71,8 +70,12 @@ class NearbyReportsList(mixins.ListModelMixin,
     serializer_class = ReportSerializer
 
     def list(self, request, *args, **kwargs):
-        min_lat, max_lat, min_long, max_long = get_limits(request)
-        queryset = self.get_queryset().filter(coordinates__latitude__range=(min_lat, max_lat))
-        queryset = queryset.filter(coordinates__longitude__range=(min_long, max_long))
-        serializer = ReportSerializer(queryset, many=True)
-        return Response(serializer.data)
+        try:
+            min_lat, max_lat, min_long, max_long = get_limits(request)
+        except ValueError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            queryset = self.get_queryset().filter(coordinates__latitude__range=(min_lat, max_lat))
+            queryset = queryset.filter(coordinates__longitude__range=(min_long, max_long))
+            serializer = ReportSerializer(queryset, many=True)
+            return Response(serializer.data)

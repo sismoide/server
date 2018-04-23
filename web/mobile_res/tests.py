@@ -359,3 +359,17 @@ class NearbyReportsTests(APITestCase):
         response = self.client.get(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+    def test_invalid_request(self):
+        url = reverse('mobile_res:nearby-reports-list')
+        data = {'latitude': 'hola', 'longitude': '-179', 'rad': '200'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {'latitude': '80', 'longitude': 'HOLA', 'rad': '200'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {'latitude': '80', 'longitude': '-179', 'rad': 'chao'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
