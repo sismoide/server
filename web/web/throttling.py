@@ -1,15 +1,5 @@
-from rest_framework.views import APIView
+from rest_framework.throttling import UserRateThrottle
 
 
-# todo: algo
-
-class ContactListView(APIView):
-    throttle_scope = 'contacts'
-
-
-class ContactDetailView(APIView):
-    throttle_scope = 'contacts'
-
-
-class UploadView(APIView):
-    throttle_scope = 'uploads'
+class MobileThrottle(UserRateThrottle):
+    scope = 'mobile'

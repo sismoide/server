@@ -7,6 +7,7 @@ from mobile_res.models import Report, EmergencyReport, ThreatReport, Nonce, Mobi
 from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerializer, ThreatReportSerializer, \
     ReportPatchSerializer
 from web.settings import HASH_CLASS
+from web.throttling import MobileThrottle
 from web_res.serializers import NonceSerializer, ChallengeSerializer
 
 
@@ -16,6 +17,7 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     queryset = Report.objects.all()
     serializer_class = ReportCreateSerializer
+    throttle_classes = (MobileThrottle,)
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
@@ -30,6 +32,7 @@ class EmergencyReportViewSet(mixins.CreateModelMixin,
                              viewsets.GenericViewSet):
     queryset = EmergencyReport.objects.all()
     serializer_class = EmergencyReportSerializer
+    throttle_classes = (MobileThrottle,)
 
 
 class ThreatReportViewSet(mixins.CreateModelMixin,
@@ -37,6 +40,7 @@ class ThreatReportViewSet(mixins.CreateModelMixin,
                           viewsets.GenericViewSet):
     queryset = ThreatReport.objects.all()
     serializer_class = ThreatReportSerializer
+    throttle_classes = (MobileThrottle,)
 
 
 class NonceViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

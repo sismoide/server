@@ -131,7 +131,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'web.authentication.TokenAuthentication',
-    )
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'web.throttling.MobileThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'mobile': '20/day',
+        'anon': '12/hour',
+    }
 }
 
 NONCE_EXPIRATION_TIME = 30 * 10  # in seconds
