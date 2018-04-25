@@ -16,6 +16,7 @@ class ReportViewSet(mixins.CreateModelMixin,
 
     queryset = Report.objects.all()
     serializer_class = ReportCreateSerializer
+    throttle_scope = 'reports'
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
@@ -30,6 +31,7 @@ class EmergencyReportViewSet(mixins.CreateModelMixin,
                              viewsets.GenericViewSet):
     queryset = EmergencyReport.objects.all()
     serializer_class = EmergencyReportSerializer
+    throttle_scope = 'events'
 
 
 class ThreatReportViewSet(mixins.CreateModelMixin,
@@ -37,6 +39,7 @@ class ThreatReportViewSet(mixins.CreateModelMixin,
                           viewsets.GenericViewSet):
     queryset = ThreatReport.objects.all()
     serializer_class = ThreatReportSerializer
+    throttle_scope = 'events'
 
 
 class NonceViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -47,7 +50,7 @@ class NonceViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     def create(self, request, *args, **kwargs):
         nonce = Nonce.objects.create()
         ser = self.serializer_class(nonce)
-        return Response(ser.data)
+        return Response(ser.data, status=status.HTTP_201_CREATED)
 
 
 class ValidateChallengeAPIView(GenericAPIView):
