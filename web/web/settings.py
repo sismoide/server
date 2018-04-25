@@ -133,11 +133,12 @@ REST_FRAMEWORK = {
         'web.authentication.TokenAuthentication',
     ),
     'DEFAULT_THROTTLE_CLASSES': (
-        'web.throttling.MobileThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
         'rest_framework.throttling.AnonRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'mobile': '20/day',
+        'reports': '20/day',
+        'events': '20/day',
         'anon': '12/hour',
     }
 }

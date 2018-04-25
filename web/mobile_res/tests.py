@@ -10,6 +10,8 @@ from rest_framework.test import APITestCase
 
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
     EmergencyReport, MobileUser
+from mobile_res.utils import random_username
+from web.settings import HASH_CLASS
 
 
 class ModelsTestCase(TestCase):
@@ -313,3 +315,51 @@ class APIResourceTestCase(APITestCase):
         response = self.client.post(post_url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_nonce_challenge(self):
+        create_nonce_url = reverse("mobile_res:nonce-list")
+        challenge_url = reverse("mobile_res:challenge")
+
+        res = self.client.post(create_nonce_url)
+        self.assertEqual(status.HTTP_201_CREATED, res.status_code)
+        nonce = res.data['key']
+        hash = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
+        # correct hash, no nonce case should error
+        res = self.client.post(challenge_url, {'h': hash})
+        self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+        # incorrect hash, correct nonce should error
+        res = self.client.post(create_nonce_url)
+        self.assertEqual(status.HTTP_201_CREATED, res.status_code)
+        second_nonce = res.data['key']
+        res = self.client.post(challenge_url,
+                               {'h': HASH_CLASS(second_nonce.encode('utf-8')).hexdigest()},
+                               HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+        # empty hash, correct nonce should error
+        res = self.client.post(challenge_url, {'h': ""}, HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, res.status_code)
+
+        # correct hash, correct nonce should pass and return token
+        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_200_OK, res.status_code)
+        self.assertIsInstance(res.data['token'], type(""))
+
+        # now check that nonce can't be used again
+        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+
+class UtilTestCase(TestCase):
+    def test_random_username(self):
+        """
+        Check uniqueness of *iter_limit* random user-names generated
+        :return:
+        """
+        iter_limit = 100000
+        username_list = []
+        for i in range(iter_limit):
+            username_list.append(random_username())
+
+        username_set = set(username_list)
+        self.assertEqual(len(username_set), len(username_list))
