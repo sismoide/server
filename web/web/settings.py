@@ -143,7 +143,7 @@ REST_FRAMEWORK = {
     }
 }
 
-NONCE_EXPIRATION_TIME = 30 * 10  # in seconds
+NONCE_EXPIRATION_TIME = 60 * 10  # in seconds
 HASH_CLASS = hashlib.sha256  # have to implement '.hexdigest()' method.
 MOBILE_PATH_PREFIX = 'mobile'
 WEB_PATH_PREFIX = 'web'
