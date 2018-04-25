@@ -8,13 +8,14 @@ from django.db import models
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+from mobile_res.utils import random_username
 from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
 
 
 class MobileUserManager(models.Manager):
     def create_random_mobile_user(self):
         # generate random user & password
-        django_user = User.objects.create_user(str(uuid.uuid5(uuid.uuid4(), "django:user")))
+        django_user = User.objects.create_user(random_username())
         django_user.set_password(User.objects.make_random_password())
         django_user.save()
         return MobileUser.objects.create(user=django_user)
