@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from unittest import skip
 
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport
+    EmergencyReport, Quake
 
 
 class ModelsTestCase(TestCase):
@@ -373,3 +373,53 @@ class NearbyReportsTests(APITestCase):
         data = {'latitude': '80', 'longitude': '-179', 'rad': 'chao'}
         response = self.client.get(url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class QuakeModelTest(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.coord1 = Coordinates.objects.create(
+            latitude=-33.45,
+            longitude=-70.66
+        )
+
+        cls.coord2 = Coordinates.objects.create(
+            latitude=-35.5,
+            longitude=-71
+        )
+
+        cls.quake1 = Quake.objects.create(
+            coordinates=cls.coord1,
+            depth=20,
+            magnitude=7.7,
+            timestamp=timezone.datetime(2018, 5, 1, hour=12)
+        )
+
+        cls.quake2 = Quake.objects.create(
+            coordinates=cls.coord2,
+            depth=5.5,
+            magnitude=9.3,
+            timestamp=timezone.datetime(2018, 4, 24, hour=18, minute=30)
+        )
+
+    def test_quakes(self):
+        self.assertIsNotNone(self.quake1)
+        self.assertIsNotNone(self.quake2)
+
+        with self.assertRaises(ValidationError):
+            Quake.objects.create(
+                coordinates=self.coord1,
+                depth=-5,
+                magnitude=5.4,
+                timestamp=timezone.datetime(2017, 1, 1, hour=1, minute=1)
+            )
+            Quake.objects.create(
+                coordinates=self.coord2,
+                depth=35,
+                magnitude=-7.1,
+                timestamp=timezone.datetime(2012, 12, 12, hour=12, minute=12)
+            )
+
