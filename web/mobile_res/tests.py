@@ -423,3 +423,88 @@ class QuakeModelTest(TestCase):
                 timestamp=timezone.datetime(2012, 12, 12, hour=12, minute=12)
             )
 
+
+class NearbyQuakeTests(APITestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.coord1 = Coordinates.objects.create(
+            latitude=-33.45,
+            longitude=-70.66
+        )
+
+        cls.coord2 = Coordinates.objects.create(
+            latitude=-35.5,
+            longitude=-71
+        )
+
+        cls.coord3 = Coordinates.objects.create(
+            latitude=-40.3,
+            longitude=-70.5
+        )
+
+        cls.quake1 = Quake.objects.create(
+            coordinates=cls.coord1,
+            depth=20,
+            magnitude=7.7,
+            timestamp=timezone.datetime(2017, 5, 1, hour=12)
+        )
+
+        cls.quake2 = Quake.objects.create(
+            coordinates=cls.coord2,
+            depth=5.5,
+            magnitude=9.3,
+            timestamp=timezone.datetime(2018, 4, 24, hour=18, minute=30)
+        )
+
+        cls.quake3 = Quake.objects.create(
+            coordinates=cls.coord1,
+            depth=50.4,
+            magnitude=6.7,
+            timestamp=timezone.now()-timezone.timedelta(minutes=30)
+        )
+
+        cls.quake4 = Quake.objects.create(
+            coordinates=cls.coord3,
+            depth=40.6,
+            magnitude=6.3,
+            timestamp=timezone.now()-timezone.timedelta(minutes=5)
+        )
+
+    def test_get_all_quakes(self):
+
+        url = reverse('mobile_res:quake-list')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
+
+    def test_get_relevant_quakes(self):
+
+        url = reverse('mobile_res:nearby-quakes-list')
+        data = {'latitude': '-33.45', 'longitude': '-70.66',
+                'start': (timezone.now()-timezone.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M"),
+                'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
+
+        response = self.client.get(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+        data = {'latitude': 'hola', 'longitude': '-70.66',
+                'start': (timezone.now()-timezone.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M"),
+                'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
+
+        response = self.client.get(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {'latitude': '-33.45', 'longitude': 'HOLA',
+                'start': (timezone.now()-timezone.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M"),
+                'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
+
+        response = self.client.get(url, data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

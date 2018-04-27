@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport
+from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport, Quake
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):
@@ -57,3 +57,11 @@ class ThreatReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ThreatReport
         fields = ('type', 'report')
+
+
+class QuakeSerializer(serializers.ModelSerializer):
+    coordinates = CoordinatesSerializer()
+
+    class Meta:
+        model = Quake
+        fields = ('timestamp', 'coordinates', 'depth', 'magnitude')
