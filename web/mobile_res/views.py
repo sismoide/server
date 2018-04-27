@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 
@@ -7,6 +8,8 @@ from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerial
 from web_res.serializers import ReportSerializer
 
 from math import cos, radians
+
+from web_res.views import getdates
 
 
 class ReportViewSet(mixins.CreateModelMixin,
@@ -72,10 +75,15 @@ class NearbyReportsList(mixins.ListModelMixin,
     def list(self, request, *args, **kwargs):
         try:
             min_lat, max_lat, min_long, max_long = get_limits(request)
+            start_date, end_date = getdates(request)
         except ValueError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
+            # add 1 minute to end_date because seconds were truncated from request
+            end_date = end_date + timezone.timedelta(minutes=1)
+
             queryset = self.get_queryset().filter(coordinates__latitude__range=(min_lat, max_lat))
             queryset = queryset.filter(coordinates__longitude__range=(min_long, max_long))
+            queryset = queryset.filter(created_on__range=(start_date, end_date))
             serializer = ReportSerializer(queryset, many=True)
             return Response(serializer.data)
