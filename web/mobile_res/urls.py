@@ -14,3 +14,7 @@ urlpatterns = router.urls
 urlpatterns += [
     path('challenge', views.ValidateChallengeAPIView.as_view(), name='challenge'),
 ]
+
+"""
+This piece of code is executed only once, at the beginning.
+"""
