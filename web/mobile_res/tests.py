@@ -367,10 +367,10 @@ class UtilTestCase(TestCase):
 
 
 class NearbyReportsTests(APITestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.token = MobileUser.objects.create_random_mobile_user().token
 
         cls.coord1 = Coordinates.objects.create(
             latitude=50.0,
@@ -427,7 +427,7 @@ class NearbyReportsTests(APITestCase):
     def test_regular_coords(self):
         url = reverse('mobile_res:nearby-reports-list')
         data = {'latitude': '50.0', 'longitude': '50.0', 'rad': '200'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
@@ -435,7 +435,7 @@ class NearbyReportsTests(APITestCase):
     def test_limit_coords(self):
         url = reverse('mobile_res:nearby-reports-list')
         data = {'latitude': '80', 'longitude': '-179', 'rad': '200'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
@@ -443,12 +443,15 @@ class NearbyReportsTests(APITestCase):
         url = reverse('mobile_res:nearby-reports-list')
         data = {'latitude': 'hola', 'longitude': '-179', 'rad': '200'}
         response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = {'latitude': '80', 'longitude': 'HOLA', 'rad': '200'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = {'latitude': '80', 'longitude': '-179', 'rad': 'chao'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
