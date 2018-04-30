@@ -10,7 +10,7 @@ class CoordinatesSerializer(serializers.ModelSerializer):
         fields = ('latitude', 'longitude', 'elevation')
 
 
-class IntensitySerializer(serializers.ModelSerializer):
+class ReportSerializer(serializers.ModelSerializer):
     coordinates = CoordinatesSerializer()
 
     class Meta:
@@ -36,7 +36,7 @@ class EmergencyTypeSerializer(serializers.ModelSerializer):
 
 class EmergencySerializer(serializers.ModelSerializer):
     type = EmergencyTypeSerializer()
-    report = IntensitySerializer()
+    report = ReportSerializer()
 
     class Meta:
         model = EmergencyReport
@@ -51,7 +51,7 @@ class ThreatTypeSerializer(serializers.ModelSerializer):
 
 class ThreatSerializer(serializers.ModelSerializer):
     type = ThreatTypeSerializer()
-    report = IntensitySerializer()
+    report = ReportSerializer()
 
     class Meta:
         model = ThreatReport

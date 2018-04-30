@@ -9,6 +9,11 @@ from mobile_res.models import Report
 from web_res.models import WebUser
 from web_res.serializers import EmergencySerializer, ThreatSerializer
 from web_res.serializers import IntensitySerializer, WebUserChangePasswordSerializer
+from mobile_res.models import Report, EmergencyReport, ThreatReport
+from web_res.serializers import ReportSerializer, EmergencySerializer, ThreatSerializer
+
+
+# Create your views here.
 
 
 def get_date(request, date_type, default):
@@ -25,11 +30,11 @@ def getdates(request):
 
 class ReportList(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Report.objects.all()
-    serializer_class = IntensitySerializer
+    serializer_class = ReportSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(created_on__range=getdates(request))
-        serializer = IntensitySerializer(queryset, many=True)
+        serializer = ReportSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
