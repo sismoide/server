@@ -1,0 +1,709 @@
+swagger: '2.0'
+info:
+  description: |
+    API for Sismoide.
+  version: 1.0.0
+  title: Sismoide API
+  termsOfService: http://simoide.cl/terms/
+  contact:
+    email: admin@sismoide.cl
+# host: petstore.swagger.io
+# basePath: /v2
+tags:
+- name: mobile
+  description: Recursos móviles
+- name: web
+  description: Recursos web
+- name: general
+  description: Recursos cross-platform
+# schemes:
+#  - http
+paths:
+  /mobile/reports:
+    post:
+      tags:
+      - mobile
+      summary: Agregar nuevo reporte (parcial o completo)
+      operationId: addReport
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: Token
+        in: header
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3```"
+      - in: body
+        name: json
+        description: JSON con datos de reporte, soporta datos parciales o completos. El unico campo requerido son las coordenadas.
+        required: true
+        schema:
+          $ref: '#/definitions/ReportComplete'
+      responses:
+        201:
+          description: report submitted
+          schema:
+            $ref: '#/definitions/PostResponseReport'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/reports/{id}:
+    patch:
+      tags:
+      - mobile
+      summary: Agrega intensidad al reporte
+      operationId: patchReport
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        description: Id de reporte que se agrega intensidad
+        type: string
+      - name: Token
+        in: header
+        # todo: descomentar
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3d4e5```  "
+      - in: body
+        name: json
+        description: JSON con datos de intensidad para actualizar el reporte
+        required: true
+        schema:
+          $ref: '#/definitions/Intensity'
+      responses:
+        200:
+          description: Ok
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/nearby_reports:
+    get:
+      tags:
+        - mobile
+      summary: Retorna reportes cercanos a un momento y lugar
+      description: "retorna reportes cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_reports?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```"
+      operationId: getNearbyReports
+      produces:
+        - "application/json"
+      parameters:
+      - name: Token
+        in: header
+        # todo: descomentar
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      - in: query
+        name: latitude 
+        description: "Latitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: longitude 
+        description: "Longitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string    
+        required: true
+      - in: query
+        name: rad 
+        required: true
+        description: "Radio en kilómetros expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+      - in: query
+        name: start 
+        description: "Hora y día desde el que se agregan los reportes. Ejemplo, ```1997-07-16T19:20+01:00```"
+        type: string
+      - in: query
+        name: end 
+        description: "Hora y día hasta el que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```"
+        type: string
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReportComplete'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/nearby_quakes:
+    get:
+      deprecated: True
+      tags:
+        - mobile
+      summary: Retorna sismos cercanos a un momento y lugar
+      description: "retorna información de sismos cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```"
+      operationId: getNearbyQuakes
+      produces:
+        - "application/json"
+      parameters:
+      - name: Token
+        in: header
+        # todo: descomentar
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      - in: query
+        name: latitude 
+        description: "Latitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: longitude 
+        description: "Longitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string    
+        required: true
+      - in: query
+        name: rad 
+        required: true
+        description: "Radio en kilómetros expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+      - in: query
+        name: start 
+        description: "Hora y día del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```"
+        type: string
+      - in: query
+        name: end 
+        description: "Hora y día del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```"
+        type: string
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Quake'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/nearby_emergencies:
+    get:
+      deprecated: True
+      tags:
+        - mobile
+      summary: Retorna reportes de emergencia cercanos a un momento y lugar
+      description: "retorna emergencias emitidas cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```"
+      operationId: getNearbyEmergencies
+      produces:
+        - "application/json"
+      parameters:
+      - name: Token
+        in: header
+        # todo: descomentar
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      - in: query
+        name: latitude 
+        description: "Latitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: longitude 
+        description: "Longitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string    
+        required: true
+      - in: query
+        name: rad 
+        required: true
+        description: "Radio en kilómetros expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+      - in: query
+        name: start 
+        description: "Hora y día desde el que se agregan los reportes de emergencia. Ejemplo, ```1997-07-16T19:20+01:00```"
+        type: string
+      - in: query
+        name: end 
+        description: "Hora y día del evento hasta el que se agregan los reportes de emergencia. Ejemplo, ```2756-07-16T19:20+01:00```"
+        type: string
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ExpandedReportEvent'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/threats:
+    post:
+      tags:
+      - mobile
+      summary: Agregar nueva amenaza a un reporte.
+      operationId: addThreat
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: Token
+        in: header
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      - in: body
+        name: json
+        description: JSON con id de tipo de amenaza y del reporte al que se agregará.
+        required: true
+        schema:
+          $ref: '#/definitions/ReportEvent'
+      responses:
+        201:
+          description: Threat submitted
+          schema:
+            $ref: '#/definitions/ReportEvent'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/emergencies:
+    post:
+      tags:
+      - mobile
+      summary: Agregar nueva emergencia a un reporte
+      operationId: addEmergency
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: Token
+        in: header
+        required: true
+        type: string
+        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      - in: body
+        name: json
+        description: JSON con id de tipo de emergencia y del reporte al que se agregará
+        required: true
+        schema:
+          $ref: '#/definitions/ReportEvent'
+      responses:
+        201:
+          description: Emergency submitted
+          schema:
+            $ref: '#/definitions/ReportEvent'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+  /mobile/nonce:
+    post:
+      deprecated: True
+      tags:
+      - mobile
+      summary: Pide nonce para calcular challenge
+      operationId: getNonce
+      produces:
+      - application/json
+      responses:
+        201:
+          description: Ok.
+          schema:
+            $ref: '#/definitions/Nonce'
+  /mobile/challenge:
+    post:
+      deprecated: True
+      tags:
+      - mobile
+      summary: Crear usuario movil, por medio de challenge del Nonce
+      operationId: addMobileUser
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        type: string
+        description: "Nonce a challengear. \n Ejemplo:\n ```Authorization: z1b2n3n4m5```"
+      - in: body
+        name: json
+        description: JSON con respuesta al challenge.
+        required: true
+        schema:
+          $ref: '#/definitions/Challenge'
+      responses:
+        201:
+          description: Mobile user created
+          schema:
+            $ref: '#/definitions/Token'
+        403:
+          description: Incorrect nonce, expired, challenge response is wrong
+        400:
+          description: Invalid JSON 
+  /web/reports:
+    get:
+      tags:
+      - web
+      summary: Lista reportes agregados en cierto momento
+      parameters:
+      - in: query
+        name: start
+        type: string
+        description: "Hora y día desde los que se agregan los reportes. Ejemplo, ```1970-07-16T19:20+01:00```" 
+      - in: query
+        name: end
+        type: string
+        description: "Hora y día hasta los que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```" 
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReportComplete'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - web_token: [] 
+  /web/emergencies:
+    get:
+      tags:
+      - web
+      summary: Lista emergencias agregadas en cierto momento
+      parameters:
+      - in: query
+        name: start
+        type: string
+        description: "Hora y día desde los que se agregan las emergencias. Ejemplo, ```1970-07-16T19:20+01:00```" 
+      - in: query
+        name: end
+        type: string
+        description: "Hora y día hasta los que se agregan las emergencias. Ejemplo, ```2756-07-16T19:20+01:00```" 
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ExpandedReportEvent'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - web_token: [] 
+  /web/threats:
+    get:
+      tags:
+      - web
+      summary: Lista amenazas agregadas en cierto momento
+      parameters:
+      - in: query
+        name: start
+        type: string
+        description: "Hora y día desde los que se agregan las amenazas. Ejemplo, ```1970-07-16T19:20+01:00```" 
+      - in: query
+        name: end
+        type: string
+        description: "Hora y día hasta los que se agregan las amenazas. Ejemplo, ```2756-07-16T19:20+01:00```" 
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ExpandedReportEvent'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - web_token: [] 
+  /web/change_pass:
+    post:
+      deprecated: True
+      tags:
+      - web
+      summary: Cambiar contraseña de web user
+      consumes: 
+      - "application/json"
+      parameters:
+      - name: Token
+        in: header
+        required: true
+        type: string
+        description: "Token de usuario web creado desde panel Admin. Ejemplo, ```Authorization: Token a1b2c3```"
+      - in: body
+        name: json
+        description: JSON con nueva password
+        required: true
+        schema:
+          $ref: '#/definitions/Password'
+      responses:
+        201:
+          description: Password changed. New token generated
+          schema:
+            $ref: '#/definitions/Token'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - web_token: []      
+  /web/get_token:
+    post:
+      deprecated: True
+      tags:
+      - web
+      summary: Obtener token de usuario web a partir de credenciales
+      consumes:
+      - "application/json"
+      parameters:
+      - in: body
+        name: json
+        description: JSON con usuario y contraseña
+        required: True
+        schema:
+          $ref: "#/definitions/WebUserAuth"
+      responses:
+        200:
+          description: Web user authenticated correctly
+          schema:
+            $ref: '#/definitions/Token'
+        403:
+          description: Invalid JSON ocheme or credentials
+  /general/threat_types:
+    get:
+      tags:
+        - general
+        - web
+        - mobile
+      summary: Lista los tipos de amenazas
+      description: Lista tipos de amenazas existentes en el sistema. Se pueden agregar nuevas amenazas desde panel de Admin
+      parameters:
+      - name: Token
+        in: header
+        required: true
+        type: string
+        description: "Token de usuario web o móvil. Ejemplo, ```Authorization: Token a1b2c3```"
+      deprecated: True
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/EventType"
+        403:
+          description: Invalid mobile or web user credential (token)        
+      security:
+      - any_token: []  
+  /general/emergency_types:
+    get:
+      tags:
+        - general
+        - web
+        - mobile
+      summary: Lista los tipos de emergencias
+      description: Lista tipos de emergencias existentes en el sistema. Se pueden agregar nuevas amenazas desde panel de Admin
+      parameters:
+      - name: Token
+        in: header
+        required: true
+        type: string
+        description: "Token de usuario web o móvil. Ejemplo, ```Authorization: Token a1b2c3```"
+      deprecated: True
+      responses:
+        200:
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/EventType"
+        403:
+          description: Invalid mobile or web user credential (token)  
+      security:
+      - any_token: []
+securityDefinitions:
+  mobile_token:
+    type: apiKey
+    name: Token
+    in: header
+  web_token:
+    type: apiKey
+    name: Token
+    in: header
+  any_token:
+    type: apiKey
+    name: Token
+    in: header
+
+
+definitions:
+  EventType:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 110
+        description: Event (Threat or Emergency) id
+      title:
+        type: string
+        example: "Restos vegetales en el suelo"
+  Coordinates:
+    type: object
+    properties:
+      latitude:
+        type: number
+        format: float
+        example: -70.666667
+      longitude:
+        type: number
+        format: float
+        example: -33.45
+  ReportComplete:
+    type: object
+    properties:
+      coordinates:
+        $ref: '#/definitions/Coordinates'
+      intensity:
+        type: integer
+        description: "Not required"
+        minimum: 1
+        maximum: 12
+      created_on:
+        type: string
+        format: date-time
+        description: 'Not required but suggested; ISO 8601 specification'
+        example: "2018-04-20T16:20+01:00"
+  Intensity:
+    type: object
+    properties:
+      intensity:
+        type: integer
+        default: null
+        example: 6
+        minimum: 1
+        maximum: 12
+  PostResponseReport:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: report id
+      coordinates:
+        $ref: '#/definitions/Coordinates'
+      intensity:
+        type: integer
+        description: "Not required"
+        default: null
+        example: 5
+        minimum: 1
+        maximum: 12
+      created_on:
+        type: string
+        format: date-time
+        description: 'Not required but suggested; ISO 8601 specification'
+        example: "2018-04-20T16:20+01:00"
+  ReportEvent:
+    type: object
+    properties:
+      type:
+        type: integer
+        description: threat or emergency type id
+        example: 21
+      report:
+        type: integer
+        description: report id
+        example: 110
+        
+  ExpandedReportEvent:
+    type: object
+    properties:
+      type:
+        type: integer
+        description: threat or emergency type id
+        example: 7
+      report:
+        $ref: "#/definitions/ReportComplete"
+  Challenge:
+    type: object
+    properties:
+      h:
+        type: string
+        description: response to challenge in exchange for a new mobile user
+        example: "a1b2cv3"
+  Token:
+    type: object
+    properties:
+      token:
+        type: string
+        description: brand new mobile user's Token. Save it carefully.
+        example: "a1b2cv3"
+  Nonce:
+    type: object
+    properties:
+      key:
+        type: string
+        example: "a1b2cv3"
+  Password:
+    type: object
+    properties:
+      password:
+        type: string
+        minLength: 8
+        
+  WebUserAuth:
+    type: object
+    properties:
+      username:
+        type: string
+        example: "juanito"
+      password:
+        type: string
+        example: "juanitosutsutsut"
+  Quake:
+    type: object
+    properties:
+      magnitude:
+        type: number
+        format: float
+        example: 8.87
+      depth:
+        type: number
+        format: float
+        example: 300.34
+      timestamp:
+        type: string
+        format: date-time
+        description: 'ISO 8601 specification'
+        example: "2018-04-20T16:20+01:00"
+      coordinates:
+        $ref: '#/definitions/Coordinates'
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /Vichoko/sde/1.0.0
+# Added by API Auto Mocking Plugin
+schemes:
+ - http
