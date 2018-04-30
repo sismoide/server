@@ -7,8 +7,7 @@ from rest_framework.response import Response
 from mobile_res.models import EmergencyReport, ThreatReport
 from mobile_res.models import Report
 from web_res.models import WebUser
-from web_res.serializers import EmergencySerializer, ThreatSerializer
-from web_res.serializers import IntensitySerializer, WebUserChangePasswordSerializer
+from web_res.serializers import WebUserChangePasswordSerializer, EmergencySerializer, ThreatSerializer
 from mobile_res.models import Report, EmergencyReport, ThreatReport
 from web_res.serializers import ReportSerializer, EmergencySerializer, ThreatSerializer
 

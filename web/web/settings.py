@@ -140,6 +140,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'reports': '20/day',
         'events': '20/day',
+        'mobile-read': '8/minute',
         'anon': '12/hour',
     }
 }
