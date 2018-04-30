@@ -66,10 +66,11 @@ class ValidateChallengeAPIView(GenericAPIView):
         return
 
     def post(self, request, *args, **kwargs):
+        # TODO: quitar texto de errores en status 403
         try:
             nonce_key = request.META['HTTP_AUTHORIZATION']
         except KeyError:
-            return Response({}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'HTTP_AUTHORIZATION header not found'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
@@ -93,10 +94,10 @@ class ValidateChallengeAPIView(GenericAPIView):
                 return Response({'token': str(mobile_user.token)})
             else:
                 # Nonce correct; hash incorrect
-                return Response({}, status=403)
+                return Response({"correct nonce, incorrect hash"}, status=403)
         except Nonce.DoesNotExist:
             # Nonce incorrect or expired
-            return Response({}, status=403)
+            return Response({"incorrect nonce or expired"}, status=403)
 
 
 def get_limits(request):
@@ -129,6 +130,7 @@ class NearbyReportsList(mixins.ListModelMixin,
 
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+    throttle_scope = 'mobile-read'
 
     def list(self, request, *args, **kwargs):
         try:
