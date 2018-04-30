@@ -7,11 +7,10 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
+from unittest import skip
 
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport, MobileUser
-from mobile_res.utils import random_username
-from web.settings import HASH_CLASS
+    EmergencyReport
 
 
 class ModelsTestCase(TestCase):
@@ -363,3 +362,91 @@ class UtilTestCase(TestCase):
 
         username_set = set(username_list)
         self.assertEqual(len(username_set), len(username_list))
+
+
+class NearbyReportsTests(APITestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.coord1 = Coordinates.objects.create(
+            latitude=50.0,
+            longitude=50.0
+        )
+        cls.coord2 = Coordinates.objects.create(
+            latitude=51.0,
+            longitude=50.0
+        )
+        cls.coord3 = Coordinates.objects.create(
+            latitude=60.0,
+            longitude=50.0
+        )
+        cls.coord4 = Coordinates.objects.create(
+            latitude=50.0,
+            longitude=51.0
+        )
+        cls.coord5 = Coordinates.objects.create(
+            latitude=50.0,
+            longitude=60.0
+        )
+
+        cls.lim_coord1 = Coordinates.objects.create(
+            latitude=80.0,
+            longitude=179.0
+        )
+
+        cls.rep1 = Report.objects.create(
+            coordinates=cls.coord1,
+            intensity=4
+        )
+        cls.rep2 = Report.objects.create(
+            coordinates=cls.coord2,
+            intensity=5
+        )
+        cls.rep3 = Report.objects.create(
+            coordinates=cls.coord3,
+            intensity=6
+        )
+        cls.rep4 = Report.objects.create(
+            coordinates=cls.coord4,
+            intensity=7
+        )
+        cls.rep5 = Report.objects.create(
+            coordinates=cls.coord5,
+            intensity=8
+        )
+
+        cls.lim_rep1 = Report.objects.create(
+            coordinates=cls.lim_coord1,
+            intensity=9
+        )
+
+    def test_regular_coords(self):
+        url = reverse('mobile_res:nearby-reports-list')
+        data = {'latitude': '50.0', 'longitude': '50.0', 'rad': '200'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+    @skip
+    def test_limit_coords(self):
+        url = reverse('mobile_res:nearby-reports-list')
+        data = {'latitude': '80', 'longitude': '-179', 'rad': '200'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_invalid_request(self):
+        url = reverse('mobile_res:nearby-reports-list')
+        data = {'latitude': 'hola', 'longitude': '-179', 'rad': '200'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {'latitude': '80', 'longitude': 'HOLA', 'rad': '200'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {'latitude': '80', 'longitude': '-179', 'rad': 'chao'}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
