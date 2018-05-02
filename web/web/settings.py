@@ -125,3 +125,20 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+QUADRANT_SIDE_SIZE = 5  # In kilometers
+"""
+son 5km oeste-este centro
+(-33.389726, -70.548273)
+(-33.389720, -70.494241)
+= delta_longitud = 0.054°
+
+son 5km norte-sur centro
+(-33.381341, -70.536420)
+(-33.426430, -70.536419)
+= delta_lat = 0.045°
+
+
+
+
+"""
