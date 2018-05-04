@@ -126,7 +126,9 @@ STATIC_URL = '/static/'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-QUADRANT_SIDE_SIZE = 5  # In kilometers
+QUADRANT_LONG_DELTA = 0.054  # ~5km west-east center of Chile
+QUADRANT_LEN_DELTA = 0.045  # ~5km north-south center of Chile
+
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)
@@ -137,8 +139,4 @@ son 5km norte-sur centro
 (-33.381341, -70.536420)
 (-33.426430, -70.536419)
 = delta_lat = 0.045°
-
-
-
-
 """
