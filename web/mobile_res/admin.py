@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from mobile_res.models import EmergencyType, ThreatType, Report, ThreatReport, EmergencyReport
+from mobile_res.models import EmergencyType, ThreatType, Report, ThreatReport, EmergencyReport, Coordinates
 
 
 class ReportAdmin(admin.ModelAdmin):
@@ -13,3 +13,5 @@ admin.site.register(Report, ReportAdmin)
 
 admin.site.register(ThreatReport)
 admin.site.register(EmergencyReport)
+
+admin.site.register(Coordinates)
