@@ -26,16 +26,17 @@ class Command(BaseCommand):
             while current_long < settings.CHILE_MAX_LONG:
                 # build quadrants from west to east
 
-                min_corner_coord = Coordinates.objects.create(
+                # todo probar que funciona
+                min_corner_coord = Coordinates.objects.get_or_create(
                     longitude=current_long,
                     latitude=current_lat
-                )
+                )[0]
                 current_long += settings.QUADRANT_LONG_DELTA
 
-                max_corner_coord = Coordinates.objects.create(
+                max_corner_coord = Coordinates.objects.get_or_create(
                     longitude=current_long,
                     latitude=current_lat
-                )
+                )[0]
 
                 quad = Quadrant.objects.create(
                     min_coordinates=min_corner_coord,
