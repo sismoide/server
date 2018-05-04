@@ -1,3 +1,4 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from mobile_res import views
@@ -9,5 +10,14 @@ router.register(r'threats', views.ThreatReportViewSet)
 router.register(r'emergencies', views.EmergencyReportViewSet)
 router.register(r'quakes', views.QuakeList)
 router.register(r'nearbyquakes', views.NearbyQuakesList, base_name='nearby-quakes')
+router.register(r'nonce', views.NonceViewSet)
+
 
 urlpatterns = router.urls
+urlpatterns += [
+    path('challenge', views.ValidateChallengeAPIView.as_view(), name='challenge'),
+]
+
+"""
+This piece of code is executed only once, at the beginning.
+"""

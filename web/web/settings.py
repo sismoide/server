@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
+import hashlib
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'mobile_res',
     'web_res',
+    'rest_framework.authtoken',
     'corsheaders',
 ]
 
@@ -59,7 +60,7 @@ ROOT_URLCONF = 'web.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,5 +124,30 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'web.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.ScopedRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'reports': '20/day',
+        'events': '20/day',
+        'mobile-read': '8/minute',
+        'anon': '12/hour',
+    }
+}
+
+NONCE_EXPIRATION_TIME = 60 * 10  # in seconds
+HASH_CLASS = hashlib.sha256  # have to implement '.hexdigest()' method.
+MOBILE_PATH_PREFIX = 'mobile'
+WEB_PATH_PREFIX = 'web'
 
 CORS_ORIGIN_ALLOW_ALL = True
