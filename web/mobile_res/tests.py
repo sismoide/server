@@ -10,7 +10,9 @@ from rest_framework.test import APITestCase
 from unittest import skip
 
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport
+    EmergencyReport, MobileUser
+from mobile_res.utils import random_username
+from web.settings import HASH_CLASS
 
 
 class ModelsTestCase(TestCase):
@@ -215,6 +217,11 @@ class ModelsTestCase(TestCase):
 
 
 class APIResourceTestCase(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.token = MobileUser.objects.create_random_mobile_user().token
+
     def test_partial_report(self):
         """
         Ensure that can create and patch a report
@@ -225,7 +232,11 @@ class APIResourceTestCase(APITestCase):
 
         # partial data
         data = {'coordinates': {'latitude': 10, 'longitude': 14}}
+        # test post without key
         response = self.client.post(post_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.post(post_url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Report.objects.count(), 1)
 
@@ -250,7 +261,12 @@ class APIResourceTestCase(APITestCase):
         report_id = response.data['id']
         patch_url = reverse('mobile_res:report-detail', kwargs={'pk': report_id})
         data = {'intensity': 4}
+        # try without token
         response = self.client.patch(patch_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # with token
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Report.objects.count(), 1)
 
@@ -271,27 +287,90 @@ class APIResourceTestCase(APITestCase):
         # shouldn't be able to change coordinates
         data = {'coordinates': {'latitude': 10, 'longitude': 15}}
         with self.assertRaises(AssertionError):
-            response = self.client.patch(patch_url, data, format='json')
+            response = self.client.patch(patch_url, data, format='json',
+                                         HTTP_AUTHORIZATION="Token {}".format(self.token.key))
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # shouldn't be able to change dates
-        data = {'created_on': timezone.now()}
-        response = self.client.patch(patch_url, data, format='json')
+        new_time = timezone.now()
+        data = {'created_on': new_time}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).created_on)
 
-        data = {'modified_on': timezone.now()}
-        response = self.client.patch(patch_url, data, format='json')
+        new_time = timezone.now()
+        data = {'modified_on': new_time}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).modified_on)
+
+        new_time = timezone.now()
+        data = {'created_on': new_time, 'modified_on': new_time}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).modified_on)
+        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).created_on)
 
         # partial data
         data = {'coordinates': {'latitude': -10, 'longitude': -14}}
-        response = self.client.post(post_url, data, format='json')
+        response = self.client.post(post_url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_nonce_challenge(self):
+        create_nonce_url = reverse("mobile_res:nonce-list")
+        challenge_url = reverse("mobile_res:challenge")
+
+        res = self.client.post(create_nonce_url)
+        self.assertEqual(status.HTTP_201_CREATED, res.status_code)
+        nonce = res.data['key']
+        hash = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
+        # correct hash, no nonce case should error
+        res = self.client.post(challenge_url, {'h': hash})
+        self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+        # incorrect hash, correct nonce should error
+        res = self.client.post(create_nonce_url)
+        self.assertEqual(status.HTTP_201_CREATED, res.status_code)
+        second_nonce = res.data['key']
+        res = self.client.post(challenge_url,
+                               {'h': HASH_CLASS(second_nonce.encode('utf-8')).hexdigest()},
+                               HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+        # empty hash, correct nonce should error
+        res = self.client.post(challenge_url, {'h': ""}, HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, res.status_code)
+
+        # correct hash, correct nonce should pass and return token
+        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_200_OK, res.status_code)
+        self.assertIsInstance(res.data['token'], type(""))
+
+        # now check that nonce can't be used again
+        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+
+class UtilTestCase(TestCase):
+    def test_random_username(self):
+        """
+        Check uniqueness of *iter_limit* random user-names generated
+        :return:
+        """
+        iter_limit = 100000
+        username_list = []
+        for i in range(iter_limit):
+            username_list.append(random_username())
+
+        username_set = set(username_list)
+        self.assertEqual(len(username_set), len(username_list))
 
 
 class NearbyReportsTests(APITestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.token = MobileUser.objects.create_random_mobile_user().token
 
         cls.coord1 = Coordinates.objects.create(
             latitude=50.0,
@@ -348,7 +427,7 @@ class NearbyReportsTests(APITestCase):
     def test_regular_coords(self):
         url = reverse('mobile_res:nearby-reports-list')
         data = {'latitude': '50.0', 'longitude': '50.0', 'rad': '200'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
@@ -356,7 +435,7 @@ class NearbyReportsTests(APITestCase):
     def test_limit_coords(self):
         url = reverse('mobile_res:nearby-reports-list')
         data = {'latitude': '80', 'longitude': '-179', 'rad': '200'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
@@ -364,12 +443,15 @@ class NearbyReportsTests(APITestCase):
         url = reverse('mobile_res:nearby-reports-list')
         data = {'latitude': 'hola', 'longitude': '-179', 'rad': '200'}
         response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = {'latitude': '80', 'longitude': 'HOLA', 'rad': '200'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data = {'latitude': '80', 'longitude': '-179', 'rad': 'chao'}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

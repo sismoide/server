@@ -315,7 +315,6 @@ paths:
       - mobile_token: []
   /mobile/nonce:
     post:
-      deprecated: True
       tags:
       - mobile
       summary: Pide nonce para calcular challenge
@@ -329,7 +328,6 @@ paths:
             $ref: '#/definitions/Nonce'
   /mobile/challenge:
     post:
-      deprecated: True
       tags:
       - mobile
       summary: Crear usuario movil, por medio de challenge del Nonce
@@ -442,7 +440,6 @@ paths:
       - web_token: [] 
   /web/change_pass:
     post:
-      deprecated: True
       tags:
       - web
       summary: Cambiar contraseña de web user
@@ -473,7 +470,6 @@ paths:
       - web_token: []      
   /web/get_token:
     post:
-      deprecated: True
       tags:
       - web
       summary: Obtener token de usuario web a partir de credenciales
@@ -705,5 +701,9 @@ definitions:
 host: virtserver.swaggerhub.com
 basePath: /Vichoko/sde/1.0.0
 # Added by API Auto Mocking Plugin
+# schemes:
+#  - http
+# Added by API Auto Mocking Plugin
 schemes:
+ - https
  - http
