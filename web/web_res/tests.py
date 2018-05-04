@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from mobile_res.models import EmergencyType, EmergencyReport
-from mobile_res.models import Report, Coordinates
+from map.models import Coordinates
+from mobile_res.models import EmergencyType, EmergencyReport, Report
 # Create your tests here.
 from web_res.models import WebUser
 

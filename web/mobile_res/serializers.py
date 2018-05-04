@@ -1,7 +1,8 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport
+from map.models import Coordinates
+from mobile_res.models import EmergencyReport, ThreatReport, Report
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):

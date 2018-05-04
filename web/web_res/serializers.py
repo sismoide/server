@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from mobile_res.models import EmergencyReport, ThreatReport, EmergencyType, ThreatType, Nonce
-from mobile_res.models import Report, Coordinates
+from map.models import Coordinates
+from mobile_res.models import EmergencyReport, ThreatReport, EmergencyType, ThreatType, Nonce, Report
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):
