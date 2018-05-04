@@ -37,9 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'mobile_res',
     'web_res',
+    'map',
+    'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
 ]
@@ -154,6 +155,12 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 QUADRANT_LONG_DELTA = 0.054  # ~5km west-east center of Chile
 QUADRANT_LEN_DELTA = 0.045  # ~5km north-south center of Chile
+
+CHILE_MAX_LAT = -17.5  # zona más al norte de chile
+CHILE_MIN_LAT = -56  # cabo de hornos
+
+CHILE_MAX_LONG = - 67  # zona mas al este de Chile
+CHILE_MIN_LONG = -109.546933  # isla de pascua
 
 """
 son 5km oeste-este centro

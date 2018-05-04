@@ -1,3 +1,5 @@
+from unittest import skip
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db import transaction
@@ -7,10 +9,10 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest import skip
 
-from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport, MobileUser
+from map.models import Coordinates
+from mobile_res.models import EmergencyType, ThreatType, ThreatReport, \
+    EmergencyReport, MobileUser, Report
 from mobile_res.utils import random_username
 from web.settings import HASH_CLASS
 

@@ -5,7 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from mobile_res.models import MobileUser, Report, ThreatType, Coordinates, EmergencyType
+from map.models import Coordinates
+from mobile_res.models import MobileUser, ThreatType, EmergencyType, Report
 from mobile_res.utils import random_username
 from web.settings import REST_FRAMEWORK, HASH_CLASS
 from web.utils import easy_post, easy_get
