@@ -154,7 +154,7 @@ WEB_PATH_PREFIX = 'web'
 CORS_ORIGIN_ALLOW_ALL = True
 
 QUADRANT_LONG_DELTA = 0.054  # ~5km west-east center of Chile
-QUADRANT_LEN_DELTA = 0.045  # ~5km north-south center of Chile
+QUADRANT_LAT_DELTA = 0.045  # ~5km north-south center of Chile
 
 CHILE_MAX_LAT = -17.5  # zona más al norte de chile
 CHILE_MIN_LAT = -56  # cabo de hornos

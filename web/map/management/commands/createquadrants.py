@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
             # finally
             print("info: finished row {}".format(y))
-            current_long = settings.CHILE_MIN_LAT
-            current_lat += settings.QUADRANT_LEN_DELTA
+            current_long = settings.CHILE_MIN_LONG
+            current_lat += settings.QUADRANT_LAT_DELTA
             x = 0
             y += 1
