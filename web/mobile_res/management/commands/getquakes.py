@@ -32,13 +32,22 @@ def qmlparse(file):
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
+        # cambiar por la ubicación de los archivos QuakeML
         loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
-        filename = 'tmpa3muo6'
-        eventid, latitude, longitude, depth, magnitude, timestamp = qmlparse(os.path.join(loc, filename))
 
-        print("eventid: " + eventid)
-        print("latitude: " + latitude)
-        print("longitude: " + longitude)
-        print("depth: " + depth)
-        print("magnitude: " + magnitude)
-        print("time: " + timestamp)
+        files = os.listdir(path=loc)
+        print(files)
+
+        for file in files:
+            eventid, latitude, longitude, depth, magnitude, timestamp = qmlparse(os.path.join(loc, file))
+
+            print(file)
+
+            print("eventid: " + eventid)
+            print("latitude: " + latitude)
+            print("longitude: " + longitude)
+            print("depth: " + depth)
+            print("magnitude: " + magnitude)
+            print("time: " + timestamp)
+
+            print()
