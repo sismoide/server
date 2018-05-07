@@ -28,6 +28,24 @@ class Coordinates(models.Model):
             (other_coordinates.longitude - self.longitude) ^ 2
         )
 
+    def __eq__(self, other):
+        return self.latitude == other.latitude and self.longitude == other.longitude
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __gt__(self, other):
+        return self.latitude > other.latitude and self.longitude > other.longitude
+
+    def __le__(self, other):
+        return not self.__gt__(other)
+
+    def __lt__(self, other):
+        return self.latitude < other.latitude or self.longitude < other.longitude
+
+    def __ge__(self, other):
+        return not self.__lt__(other)
+
 
 class Quadrant(models.Model):
     """
@@ -52,6 +70,8 @@ class Quadrant(models.Model):
             self.max_coordinates
         )
 
+    def __eq__(self, other):
+        return self.min_coordinates == other.min_coordinates and self.max_coordinates == other.max_coordinates
 
 class ReportQuadrantAggregationSlice(models.Model):
     """
