@@ -152,6 +152,7 @@ class ThreatReport(EventReport):
 
 class Quake(models.Model):
 
+    eventid = models.CharField(primary_key=True, max_length=14)
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     depth = models.FloatField(default=0)
     magnitude = models.FloatField(default=0)
@@ -160,7 +161,7 @@ class Quake(models.Model):
     def save(self, *args, **kwargs):
         if self.depth:
             if self.depth < 0:
-                raise ValidationError("Negative depth ({} km) not allowed.".format(self.depth))
+                raise ValidationError("Negative depth ({} m) not allowed.".format(self.depth))
 
         if self.magnitude:
             if self.magnitude < 0:

@@ -1,15 +1,11 @@
 from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
-from rest_framework import viewsets, mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from mobile_res.models import Report, EmergencyReport, ThreatReport, Quake
-from mobile_res.models import Report, EmergencyReport, ThreatReport, Nonce, MobileUser
+from mobile_res.models import Report, EmergencyReport, ThreatReport, Quake, Nonce, MobileUser
 from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerializer, ThreatReportSerializer, \
     ReportPatchSerializer, QuakeSerializer
-    ReportPatchSerializer
 from web.settings import HASH_CLASS
 from web_res.serializers import NonceSerializer, ChallengeSerializer
 from web_res.serializers import ReportSerializer

@@ -10,8 +10,7 @@ from rest_framework.test import APITestCase
 from unittest import skip
 
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport, Quake
-    EmergencyReport, MobileUser
+    EmergencyReport, Quake, MobileUser
 from mobile_res.utils import random_username
 from web.settings import HASH_CLASS
 
