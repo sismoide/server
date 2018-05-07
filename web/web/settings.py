@@ -129,7 +129,9 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
+
         'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'web.authentication.TokenAuthentication',
@@ -150,6 +152,7 @@ NONCE_EXPIRATION_TIME = 60 * 10  # in seconds
 HASH_CLASS = hashlib.sha256  # have to implement '.hexdigest()' method.
 MOBILE_PATH_PREFIX = 'mobile'
 WEB_PATH_PREFIX = 'web'
+MAP_PATH_PREFIX = 'map'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
