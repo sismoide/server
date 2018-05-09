@@ -1,13 +1,15 @@
 from rest_framework import viewsets, mixins
 
 from map.models import Quadrant
+from map.serializers import QuadrantSerializer
 
 
 class QuadrantsViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
+    serializer_class = QuadrantSerializer
+    queryset = Quadrant.objects.all()
 
     def get_queryset(self):
-        queryset = Quadrant.objects.all()
         min_lat = self.request.query_params.get('min_lat', None)
         min_long = self.request.query_params.get('min_long', None)
         max_lat = self.request.query_params.get('max_lat', None)
@@ -16,7 +18,7 @@ class QuadrantsViewSet(mixins.ListModelMixin,
         if min_lat is None or min_long is None or max_lat is None or max_long is None:
             return Quadrant.objects.none()
 
-        return queryset.filter(
+        return self.queryset.filter(
             min_coordinates__latitude__gte=min_lat,
             min_coordinates__longitude__gte=min_long,
             max_coordinates__latitude__lte=max_lat,

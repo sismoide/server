@@ -140,8 +140,8 @@ class ThrottleTestCase(APITestCase):
         res = self.client.post(create_nonce_url)
         self.assertEqual(status.HTTP_201_CREATED, res.status_code)
         nonce = res.data['key']
-        hash = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
-        res = self.client.post(challenge_url, {"h": hash}, HTTP_AUTHORIZATION=nonce)
+        challenge_response = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
+        res = self.client.post(challenge_url, {"h": challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_200_OK, res.status_code)
 
         for i in range(self.anon_limit_rate - 2):
@@ -149,8 +149,8 @@ class ThrottleTestCase(APITestCase):
             self.assertEqual(status.HTTP_201_CREATED, res.status_code)
             nonce = res.data['key']
 
-        hash = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
-        res = self.client.post(challenge_url, {"h": hash}, HTTP_AUTHORIZATION=nonce)
+        challenge_response = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
+        res = self.client.post(challenge_url, {"h": challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_429_TOO_MANY_REQUESTS, res.status_code)
 
         res = self.client.post(create_nonce_url)

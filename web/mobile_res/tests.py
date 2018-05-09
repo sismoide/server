@@ -106,7 +106,6 @@ class ModelsTestCase(TestCase):
         self.assertLess(self.parc_coord3.latitude, 0)
         self.assertLess(self.parc_coord4.latitude, 0)
 
-
         # long
         self.assertLess(self.parc_coord1.longitude, 0)
         self.assertGreater(self.parc_coord2.longitude, 0)
@@ -302,12 +301,12 @@ class APIResourceTestCase(APITestCase):
         res = self.client.post(create_nonce_url)
         self.assertEqual(status.HTTP_201_CREATED, res.status_code)
         nonce = res.data['key']
-        hash = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
-        # correct hash, no nonce case should error
-        res = self.client.post(challenge_url, {'h': hash})
+        challenge_response = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
+        # correct challenge_response, no nonce case should error
+        res = self.client.post(challenge_url, {'h': challenge_response})
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
 
-        # incorrect hash, correct nonce should error
+        # incorrect challenge_response, correct nonce should error
         res = self.client.post(create_nonce_url)
         self.assertEqual(status.HTTP_201_CREATED, res.status_code)
         second_nonce = res.data['key']
@@ -316,17 +315,17 @@ class APIResourceTestCase(APITestCase):
                                HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
 
-        # empty hash, correct nonce should error
+        # empty challenge_response, correct nonce should error
         res = self.client.post(challenge_url, {'h': ""}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, res.status_code)
 
-        # correct hash, correct nonce should pass and return token
-        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        # correct challenge_response, correct nonce should pass and return token
+        res = self.client.post(challenge_url, {'h': challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_200_OK, res.status_code)
         self.assertIsInstance(res.data['token'], type(""))
 
         # now check that nonce can't be used again
-        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        res = self.client.post(challenge_url, {'h': challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
 
 

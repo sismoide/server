@@ -58,7 +58,7 @@ class WebUserChangePassword(GenericAPIView):
     def get_queryset(self):
         return
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         django_user = request.user
         try:
             web_user = WebUser.objects.get(user=django_user)

@@ -62,7 +62,7 @@ class ValidateChallengeAPIView(GenericAPIView):
     def get_queryset(self):
         return
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         # TODO: quitar texto de errores en status 403
         try:
             nonce_key = request.META['HTTP_AUTHORIZATION']
