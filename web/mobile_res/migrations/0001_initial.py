@@ -9,7 +9,6 @@ from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -51,8 +50,10 @@ class Migration(migrations.Migration):
             name='MobileUser',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='authtoken.Token')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('token', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                               to='authtoken.Token')),
+                (
+                'user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -74,7 +75,8 @@ class Migration(migrations.Migration):
                 ('modified_on',
                  models.DateTimeField(default=datetime.datetime(2018, 5, 4, 18, 2, 13, 265039, tzinfo=utc))),
                 ('intensity', models.IntegerField(blank=True, null=True)),
-                ('coordinates', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='mobile_res.Coordinates')),
+                ('coordinates',
+                 models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='mobile_res.Coordinates')),
             ],
         ),
         migrations.CreateModel(

@@ -1,18 +1,15 @@
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
+from math import cos, radians
+
 from rest_framework import viewsets, mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from mobile_res.models import Report, EmergencyReport, ThreatReport, Nonce, MobileUser
+from mobile_res.models import EmergencyReport, ThreatReport, Nonce, MobileUser, Report
 from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerializer, ThreatReportSerializer, \
     ReportPatchSerializer
 from web.settings import HASH_CLASS
-from web_res.serializers import NonceSerializer, ChallengeSerializer
-from web_res.serializers import ReportSerializer
-
-from math import cos, radians
+from web_res.serializers import NonceSerializer, ChallengeSerializer, ReportSerializer
 
 
 class ReportViewSet(mixins.CreateModelMixin,
@@ -65,7 +62,7 @@ class ValidateChallengeAPIView(GenericAPIView):
     def get_queryset(self):
         return
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         # TODO: quitar texto de errores en status 403
         try:
             nonce_key = request.META['HTTP_AUTHORIZATION']

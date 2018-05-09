@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from mobile_res.models import EmergencyType, EmergencyReport
-from mobile_res.models import Report, Coordinates
+from map.models import Coordinates
+from mobile_res.models import EmergencyType, EmergencyReport, Report
 # Create your tests here.
 from web_res.models import WebUser
 
@@ -23,9 +23,7 @@ class ReportTests(APITestCase):
         # full coords
         cls.full_coord1 = Coordinates.objects.create(
             latitude=179.555555,
-            longitude=122.123456,
-            elevation=120.5
-        )
+            longitude=122.123456)
 
         # partial coords
         cls.part_coord1 = Coordinates.objects.create(
@@ -73,7 +71,6 @@ class EmergencyTests(APITestCase):
         cls.full_coord1 = Coordinates.objects.create(
             latitude=179.555555,
             longitude=122.123456,
-            elevation=120.5
         )
 
         # partial coords

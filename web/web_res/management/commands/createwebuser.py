@@ -33,7 +33,7 @@ class Command(BaseCommand):
         password = get_password()
         email = get_email()
 
-        WebUser.objects.create_web_user(
+        wu = WebUser.objects.create_web_user(
             username,
             email,
             password
@@ -41,6 +41,9 @@ class Command(BaseCommand):
 
         print("\n\nWeb User created successfully.\n")
         print("Created user Credentials:\n Username:{}\n Email:{}\n".format(username, email))
+        if input("Press enter to print token. Ctrl+C to leave."):
+            return
+        print("{}".format(wu.token))
         if input("Press enter to print plain password. Ctrl+C to leave."):
             return
         print("{}".format(password))

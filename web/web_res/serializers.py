@@ -1,13 +1,7 @@
 from rest_framework import serializers
 
-from mobile_res.models import EmergencyReport, ThreatReport, EmergencyType, ThreatType, Nonce
-from mobile_res.models import Report, Coordinates
-
-
-class CoordinatesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Coordinates
-        fields = ('latitude', 'longitude', 'elevation')
+from map.serializers import CoordinatesSerializer
+from mobile_res.models import EmergencyReport, ThreatReport, EmergencyType, ThreatType, Nonce, Report
 
 
 class ReportSerializer(serializers.ModelSerializer):
