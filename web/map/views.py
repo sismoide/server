@@ -1,13 +1,10 @@
 from rest_framework import viewsets, mixins
 
 from map.models import Quadrant
-from map.serializers import LocationRadiusSerializer
 
 
 class QuadrantsViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
-    serializer_class = LocationRadiusSerializer
-    queryset = Quadrant.objects.all()
 
     def get_queryset(self):
         queryset = Quadrant.objects.all()
