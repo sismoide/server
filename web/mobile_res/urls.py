@@ -15,7 +15,7 @@ router.register(r'nonce', views.NonceViewSet)
 
 urlpatterns = router.urls
 urlpatterns += [
-    path('challenge', views.ValidateChallengeAPIView.as_view(), name='challenge'),
+    path('challenge/', views.ValidateChallengeAPIView.as_view(), name='challenge'),
 ]
 
 """

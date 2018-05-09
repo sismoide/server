@@ -1,3 +1,5 @@
+from unittest import skip
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db import transaction
@@ -7,8 +9,10 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest import skip
 
+from map.models import Coordinates
+from mobile_res.models import EmergencyType, ThreatType, ThreatReport, \
+    EmergencyReport, MobileUser, Report
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
     EmergencyReport, Quake, MobileUser
 from mobile_res.utils import random_username
@@ -24,23 +28,17 @@ class ModelsTestCase(TestCase):
         # fully defined coords
         cls.full_coord1 = Coordinates.objects.create(
             latitude=-179.555555,
-            longitude=-122.123456,
-            elevation=8000
-        )
+            longitude=-122.123456)
         cls.full_coord2 = Coordinates.objects.create(
             latitude=179.555555,
-            longitude=122.123456,
-            elevation=120.5
+            longitude=122.123456
         )
         cls.full_coord3 = Coordinates.objects.create(
             latitude=-179.555555,
-            longitude=122.123456,
-            elevation=-100.333333333
-        )
+            longitude=122.123456)
         cls.full_coord4 = Coordinates.objects.create(
             latitude=-2,
-            longitude=5,
-            elevation=0
+            longitude=5
         )
 
         # parcially defined coords
@@ -91,21 +89,11 @@ class ModelsTestCase(TestCase):
         self.assertLess(self.full_coord3.latitude, 0)
         self.assertLess(self.full_coord4.latitude, 0)
 
-        # elev
-        self.assertGreater(self.full_coord1.elevation, 0)
-        self.assertGreater(self.full_coord2.elevation, 0)
-        self.assertLess(self.full_coord3.elevation, 0)
-        self.assertEqual(self.full_coord4.elevation, 0)
-
         # long
         self.assertLess(self.full_coord1.longitude, 0)
         self.assertGreater(self.full_coord2.longitude, 0)
         self.assertGreater(self.full_coord3.longitude, 0)
         self.assertGreater(self.full_coord4.longitude, 0)
-
-        # str
-        self.assertTrue(str(self.full_coord1.elevation) in str(self.full_coord1))
-        self.assertTrue("m" in str(self.full_coord1))
 
     def test_incomplete_coords(self):
         # existence
@@ -119,12 +107,6 @@ class ModelsTestCase(TestCase):
         self.assertGreater(self.parc_coord2.latitude, 0)
         self.assertLess(self.parc_coord3.latitude, 0)
         self.assertLess(self.parc_coord4.latitude, 0)
-
-        # elev
-        self.assertIsNone(self.parc_coord1.elevation)
-        self.assertIsNone(self.parc_coord2.elevation)
-        self.assertIsNone(self.parc_coord3.elevation)
-        self.assertIsNone(self.parc_coord4.elevation)
 
         # long
         self.assertLess(self.parc_coord1.longitude, 0)
@@ -253,7 +235,6 @@ class APIResourceTestCase(APITestCase):
         self.assertEqual(rep.coordinates.latitude, 10)
         self.assertEqual(rep.coordinates.longitude, 14)
         # self.assertEqual(rep.created_on.second, rep.modified_on.second)
-        self.assertIsNone(rep.coordinates.elevation)
         self.assertIsNotNone(rep.modified_on)
         self.assertNotEqual(rep.created_on, rep.modified_on)
 
@@ -281,7 +262,6 @@ class APIResourceTestCase(APITestCase):
         self.assertIsNotNone(rep.coordinates)
         self.assertEqual(rep.coordinates.latitude, 10)
         self.assertEqual(rep.coordinates.longitude, 14)
-        self.assertIsNone(rep.coordinates.elevation)
         self.assertIsNotNone(rep.modified_on)
 
         # shouldn't be able to change coordinates
@@ -323,12 +303,12 @@ class APIResourceTestCase(APITestCase):
         res = self.client.post(create_nonce_url)
         self.assertEqual(status.HTTP_201_CREATED, res.status_code)
         nonce = res.data['key']
-        hash = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
-        # correct hash, no nonce case should error
-        res = self.client.post(challenge_url, {'h': hash})
+        challenge_response = HASH_CLASS(nonce.encode('utf-8')).hexdigest()
+        # correct challenge_response, no nonce case should error
+        res = self.client.post(challenge_url, {'h': challenge_response})
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
 
-        # incorrect hash, correct nonce should error
+        # incorrect challenge_response, correct nonce should error
         res = self.client.post(create_nonce_url)
         self.assertEqual(status.HTTP_201_CREATED, res.status_code)
         second_nonce = res.data['key']
@@ -337,17 +317,17 @@ class APIResourceTestCase(APITestCase):
                                HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
 
-        # empty hash, correct nonce should error
+        # empty challenge_response, correct nonce should error
         res = self.client.post(challenge_url, {'h': ""}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_400_BAD_REQUEST, res.status_code)
 
-        # correct hash, correct nonce should pass and return token
-        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        # correct challenge_response, correct nonce should pass and return token
+        res = self.client.post(challenge_url, {'h': challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_200_OK, res.status_code)
         self.assertIsInstance(res.data['token'], type(""))
 
         # now check that nonce can't be used again
-        res = self.client.post(challenge_url, {'h': hash}, HTTP_AUTHORIZATION=nonce)
+        res = self.client.post(challenge_url, {'h': challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
 
 

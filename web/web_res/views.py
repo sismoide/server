@@ -4,15 +4,9 @@ from rest_framework import mixins, viewsets, permissions, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from mobile_res.models import EmergencyReport, ThreatReport
-from mobile_res.models import Report
-from web_res.models import WebUser
-from web_res.serializers import WebUserChangePasswordSerializer, EmergencySerializer, ThreatSerializer
 from mobile_res.models import Report, EmergencyReport, ThreatReport
-from web_res.serializers import ReportSerializer, EmergencySerializer, ThreatSerializer
-
-
-# Create your views here.
+from web_res.models import WebUser
+from web_res.serializers import ReportSerializer, WebUserChangePasswordSerializer, EmergencySerializer, ThreatSerializer
 
 
 def get_date(request, date_type, default):
@@ -64,7 +58,7 @@ class WebUserChangePassword(GenericAPIView):
     def get_queryset(self):
         return
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         django_user = request.user
         try:
             web_user = WebUser.objects.get(user=django_user)
