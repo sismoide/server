@@ -10,11 +10,9 @@ class Coordinates(models.Model):
     """
     latitude = models.DecimalField(max_digits=13, decimal_places=10)
     longitude = models.DecimalField(max_digits=13, decimal_places=10)
-    elevation = models.FloatField(blank=True, null=True)
 
     def __str__(self):
-        return "{}, {} [{} m]".format(self.latitude, self.longitude, self.elevation) if self.elevation \
-            else "{}, {}".format(self.latitude, self.longitude)
+        return "{}, {}".format(self.latitude, self.longitude)
 
     def distance(self, other_coordinates):
         """
@@ -72,6 +70,7 @@ class Quadrant(models.Model):
 
     def __eq__(self, other):
         return self.min_coordinates == other.min_coordinates and self.max_coordinates == other.max_coordinates
+
 
 class ReportQuadrantAggregationSlice(models.Model):
     """

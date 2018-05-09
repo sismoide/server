@@ -125,22 +125,24 @@ class GetQuadrantsTestCase(APITestCase):
 
         min_coord_limit = Coordinates.objects.create(longitude=2, latitude=1)
         max_coord_limit = Coordinates.objects.create(longitude=3, latitude=2)
-        data = {
-            'min_coordinates': self.coord_ser(min_coord_limit).data,
-            'max_coordinates': self.coord_ser(max_coord_limit).data,
-        }
 
-        response = self.client.get(url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        def get_data(min_coords, max_coords):
+            return {
+                'min_lat': min_coords.latitude,
+                'min_long': min_coords.longitude,
+                'max_lat': max_coords.latitude,
+                'max_long': max_coords.longitude
+            }
+
+        response = self.client.get(url, get_data(min_coord_limit, max_coord_limit),
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
         min_coord_limit = Coordinates.objects.create(longitude=0, latitude=0)
         max_coord_limit = Coordinates.objects.create(longitude=3, latitude=2)
-        data = {
-            'min_coordinates': self.coord_ser(min_coord_limit).data,
-            'max_coordinates': self.coord_ser(max_coord_limit).data,
-        }
 
-        response = self.client.get(url, data, format='json', HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        response = self.client.get(url, get_data(min_coord_limit, max_coord_limit), format='json',
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 6)

@@ -1,9 +1,7 @@
-from bokeh.models import Quad
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
+from rest_framework import viewsets, mixins
 
 from map.models import Quadrant
-from map.serializers import LocationRadiusSerializer, QuadrantSerializer
+from map.serializers import LocationRadiusSerializer
 
 
 class QuadrantsViewSet(mixins.ListModelMixin,
@@ -11,24 +9,19 @@ class QuadrantsViewSet(mixins.ListModelMixin,
     serializer_class = LocationRadiusSerializer
     queryset = Quadrant.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        if not serializer.is_valid():
-            return Response({'invalid scheme'}, status=status.HTTP_400_BAD_REQUEST)
-        validated_data = serializer.validated_data
+    def get_queryset(self):
+        queryset = Quadrant.objects.all()
+        min_lat = self.request.query_params.get('min_lat', None)
+        min_long = self.request.query_params.get('min_long', None)
+        max_lat = self.request.query_params.get('max_lat', None)
+        max_long = self.request.query_params.get('max_long', None)
 
-        min_lat = validated_data['min_coordinates']['latitude']
-        min_long = validated_data['min_coordinates']['longitude']
+        if min_lat is None or min_long is None or max_lat is None or max_long is None:
+            return Quadrant.objects.none()
 
-        max_lat = validated_data['max_coordinates']['latitude']
-        max_long = validated_data['max_coordinates']['longitude']
-
-        quads = self.queryset.filter(
+        return queryset.filter(
             min_coordinates__latitude__gte=min_lat,
             min_coordinates__longitude__gte=min_long,
             max_coordinates__latitude__lte=max_lat,
             max_coordinates__longitude__lte=max_long
         )
-        print(quads.count())
-        return Response(QuadrantSerializer(quads).data)
-
