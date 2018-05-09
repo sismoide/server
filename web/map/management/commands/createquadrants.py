@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
                 max_corner_coord = Coordinates.objects.get_or_create(
                     longitude=current_long,
-                    latitude=current_lat
+                    latitude=current_lat + settings.QUADRANT_LAT_DELTA
                 )[0]
 
                 quad = Quadrant.objects.create(
