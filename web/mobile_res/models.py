@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from mobile_res.utils import random_username
+from map.models import Coordinates
 from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
 
 
@@ -141,6 +142,9 @@ class Quake(models.Model):
                 raise ValidationError("Negative magnitude ({}) not allowed".format(self.magnitude))
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "{}: {} quake at {}".format(self.eventid, self.magnitude, self.timestamp)
 
 
 # Auth

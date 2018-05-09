@@ -2,16 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from map.serializers import CoordinatesSerializer
-from mobile_res.models import EmergencyReport, ThreatReport, Report
-from mobile_res.models import Report, Coordinates, EmergencyReport, ThreatReport, Quake
-
-
-class CoordinatesSerializer(serializers.ModelSerializer):
-    elevation = serializers.FloatField(required=False)
-
-    class Meta:
-        model = Coordinates
-        fields = ('latitude', 'longitude', 'elevation',)
+from mobile_res.models import Report, EmergencyReport, ThreatReport, Quake
 
 
 class ReportCreateSerializer(serializers.ModelSerializer):
