@@ -26,23 +26,17 @@ class ModelsTestCase(TestCase):
         # fully defined coords
         cls.full_coord1 = Coordinates.objects.create(
             latitude=-179.555555,
-            longitude=-122.123456,
-            elevation=8000
-        )
+            longitude=-122.123456)
         cls.full_coord2 = Coordinates.objects.create(
             latitude=179.555555,
-            longitude=122.123456,
-            elevation=120.5
+            longitude=122.123456
         )
         cls.full_coord3 = Coordinates.objects.create(
             latitude=-179.555555,
-            longitude=122.123456,
-            elevation=-100.333333333
-        )
+            longitude=122.123456)
         cls.full_coord4 = Coordinates.objects.create(
             latitude=-2,
-            longitude=5,
-            elevation=0
+            longitude=5
         )
 
         # parcially defined coords
@@ -93,21 +87,11 @@ class ModelsTestCase(TestCase):
         self.assertLess(self.full_coord3.latitude, 0)
         self.assertLess(self.full_coord4.latitude, 0)
 
-        # elev
-        self.assertGreater(self.full_coord1.elevation, 0)
-        self.assertGreater(self.full_coord2.elevation, 0)
-        self.assertLess(self.full_coord3.elevation, 0)
-        self.assertEqual(self.full_coord4.elevation, 0)
-
         # long
         self.assertLess(self.full_coord1.longitude, 0)
         self.assertGreater(self.full_coord2.longitude, 0)
         self.assertGreater(self.full_coord3.longitude, 0)
         self.assertGreater(self.full_coord4.longitude, 0)
-
-        # str
-        self.assertTrue(str(self.full_coord1.elevation) in str(self.full_coord1))
-        self.assertTrue("m" in str(self.full_coord1))
 
     def test_incomplete_coords(self):
         # existence
@@ -122,11 +106,6 @@ class ModelsTestCase(TestCase):
         self.assertLess(self.parc_coord3.latitude, 0)
         self.assertLess(self.parc_coord4.latitude, 0)
 
-        # elev
-        self.assertIsNone(self.parc_coord1.elevation)
-        self.assertIsNone(self.parc_coord2.elevation)
-        self.assertIsNone(self.parc_coord3.elevation)
-        self.assertIsNone(self.parc_coord4.elevation)
 
         # long
         self.assertLess(self.parc_coord1.longitude, 0)
@@ -255,7 +234,6 @@ class APIResourceTestCase(APITestCase):
         self.assertEqual(rep.coordinates.latitude, 10)
         self.assertEqual(rep.coordinates.longitude, 14)
         # self.assertEqual(rep.created_on.second, rep.modified_on.second)
-        self.assertIsNone(rep.coordinates.elevation)
         self.assertIsNotNone(rep.modified_on)
         self.assertNotEqual(rep.created_on, rep.modified_on)
 
@@ -283,7 +261,6 @@ class APIResourceTestCase(APITestCase):
         self.assertIsNotNone(rep.coordinates)
         self.assertEqual(rep.coordinates.latitude, 10)
         self.assertEqual(rep.coordinates.longitude, 14)
-        self.assertIsNone(rep.coordinates.elevation)
         self.assertIsNotNone(rep.modified_on)
 
         # shouldn't be able to change coordinates

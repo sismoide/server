@@ -23,9 +23,7 @@ class ReportTests(APITestCase):
         # full coords
         cls.full_coord1 = Coordinates.objects.create(
             latitude=179.555555,
-            longitude=122.123456,
-            elevation=120.5
-        )
+            longitude=122.123456)
 
         # partial coords
         cls.part_coord1 = Coordinates.objects.create(
@@ -73,7 +71,6 @@ class EmergencyTests(APITestCase):
         cls.full_coord1 = Coordinates.objects.create(
             latitude=179.555555,
             longitude=122.123456,
-            elevation=120.5
         )
 
         # partial coords

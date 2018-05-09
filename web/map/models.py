@@ -6,7 +6,6 @@ from django.db import models
 class Coordinates(models.Model):
     """
     latitude and longitude specified in Decimal Degrees (xxx.ddddddddd)
-    elevation specified in Meters above sea.
     """
     latitude = models.DecimalField(max_digits=13, decimal_places=10)
     longitude = models.DecimalField(max_digits=13, decimal_places=10)
