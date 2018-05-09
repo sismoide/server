@@ -9,15 +9,6 @@ class CoordinatesSerializer(serializers.ModelSerializer):
         fields = ('latitude', 'longitude')
 
 
-class LocationRadiusSerializer(serializers.Serializer):
-    min_coordinates = CoordinatesSerializer()
-    max_coordinates = CoordinatesSerializer()
-
-    def validate(self, attrs):
-        print(attrs)
-        return super(LocationRadiusSerializer, self).validate()
-
-
 class QuadrantSerializer(serializers.ModelSerializer):
     min_coordinates = CoordinatesSerializer()
     max_coordinates = CoordinatesSerializer()
