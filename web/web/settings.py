@@ -9,12 +9,11 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
+import hashlib
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
@@ -25,8 +24,7 @@ SECRET_KEY = 'i7r2tyl572bx2xa-5(6s*x#pcq-)y9bxk(%ro++lz9)&@t46nj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -37,10 +35,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mobile_res',
+    'web_res',
+    'map',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,7 +59,7 @@ ROOT_URLCONF = 'web.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,7 +74,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'web.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
@@ -80,7 +83,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -100,7 +102,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
@@ -114,8 +115,56 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'web.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.ScopedRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'reports': '20/day',
+        'events': '20/day',
+        'mobile-read': '8/minute',
+        'anon': '12/hour',
+    }
+}
+
+NONCE_EXPIRATION_TIME = 60 * 10  # in seconds
+HASH_CLASS = hashlib.sha256  # have to implement '.hexdigest()' method.
+MOBILE_PATH_PREFIX = 'mobile'
+WEB_PATH_PREFIX = 'web'
+MAP_PATH_PREFIX = 'map'
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+QUADRANT_LONG_DELTA = 0.054  # ~5km west-east center of Chile
+QUADRANT_LAT_DELTA = 0.045  # ~5km north-south center of Chile
+
+CHILE_MAX_LAT = -17.5  # zona más al norte de chile
+CHILE_MIN_LAT = -56  # cabo de hornos
+
+CHILE_MAX_LONG = - 67  # zona mas al este de Chile
+CHILE_MIN_LONG = -109.546933  # isla de pascua
+
+"""
+son 5km oeste-este centro
+(-33.389726, -70.548273)
+(-33.389720, -70.494241)
+= delta_longitud = 0.054°
+
+son 5km norte-sur centro
+(-33.381341, -70.536420)
+(-33.426430, -70.536419)
+= delta_lat = 0.045°
+"""

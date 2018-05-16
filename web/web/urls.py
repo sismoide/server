@@ -1,21 +1,13 @@
-"""web URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.views.generic import TemplateView
+
+from web.settings import MOBILE_PATH_PREFIX, WEB_PATH_PREFIX, MAP_PATH_PREFIX
 
 urlpatterns = [
+    path('', TemplateView.as_view(template_name='docs/docs.html'), name='index'),
     path('admin/', admin.site.urls),
+    path('{}/'.format(MOBILE_PATH_PREFIX), include(('mobile_res.urls', 'mobile_res'), namespace='mobile_res')),
+    path('{}/'.format(WEB_PATH_PREFIX), include(('web_res.urls', 'web_res'), namespace='web_res')),
+    path('{}/'.format(MAP_PATH_PREFIX), include(('map.urls', 'map'), namespace='map')),
 ]
