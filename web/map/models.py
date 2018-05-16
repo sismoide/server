@@ -11,7 +11,7 @@ class Coordinates(models.Model):
     longitude = models.DecimalField(max_digits=13, decimal_places=10)
 
     def __str__(self):
-        return "{}, {}".format(self.latitude, self.longitude)
+        return "{}, {}".format(self.longitude, self.latitude)
 
     def distance(self, other_coordinates):
         """
@@ -44,6 +44,23 @@ class Coordinates(models.Model):
         return not self.__lt__(other)
 
 
+class QuadrantManager(models.Manager):
+
+    def find_by_report_coord(self, report):
+        """
+        Get quadrant that contain report's coordinates.
+        :param report:
+        :return:
+        """
+        coords = report.coordinates
+        return Quadrant.objects.get(
+            min_coordinates__latitude__lte=coords.latitude,
+            min_coordinates__longitude__lte=coords.longitude,
+            max_coordinates__latitude__gt=coords.latitude,
+            max_coordinates__longitude__gt=coords.longitude
+        )
+
+
 class Quadrant(models.Model):
     """
     Chile is democratized in quadrilateral quadrants of size specified in
@@ -58,6 +75,7 @@ class Quadrant(models.Model):
     max_coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT, related_name='quadrant_max')
     map_relative_pos_x = models.IntegerField()
     map_relative_pos_y = models.IntegerField()
+    objects = QuadrantManager()
 
     def __str__(self):
         return "Quadrant:\n relative pos ({}, {});\n coordinates of edges [({}), ({})]".format(
@@ -81,6 +99,6 @@ class ReportQuadrantAggregationSlice(models.Model):
     start_timestamp = models.DateTimeField()
     end_timestamp = models.DateTimeField()
     quadrant = models.ForeignKey(Quadrant, on_delete=models.CASCADE)
-    report_total_count = models.IntegerField()
-    report_w_intensity_count = models.IntegerField()
-    intensity_sum = models.IntegerField()
+    report_total_count = models.IntegerField(default=0)
+    report_w_intensity_count = models.IntegerField(default=0)
+    intensity_sum = models.IntegerField(default=0)

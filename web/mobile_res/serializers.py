@@ -1,5 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from map.serializers import CoordinatesSerializer
 from mobile_res.models import EmergencyReport, ThreatReport, Report
@@ -38,6 +39,16 @@ class ReportPatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ('id', 'intensity')
+
+    def validate(self, attrs):
+        ret = super().validate(attrs)
+        try:
+            rep = Report.objects.get(pk=self.instance.id)
+            if rep.intensity:
+                raise ValidationError("intensity was already in the report")
+        except Report.DoesNotExist:
+            raise ValidationError("report not found")
+        return ret
 
 
 class EmergencyReportSerializer(serializers.ModelSerializer):

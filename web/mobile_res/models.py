@@ -4,11 +4,14 @@ import uuid
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+from map.models import ReportQuadrantAggregationSlice, Quadrant
 from mobile_res.utils import random_username
-from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
+from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS, REPORT_AGGREGATION_SLICE_DELTA_TIME
 
 
 class MobileUserManager(models.Manager):
@@ -29,10 +32,11 @@ class Report(models.Model):
     @ intensity: Mercalli's intensity recorded by user.
 
     """
-    created_on = models.DateTimeField(editable=False, default=timezone.now())
-    modified_on = models.DateTimeField(default=timezone.now())
+    created_on = models.DateTimeField(editable=False, default=timezone.now)
+    modified_on = models.DateTimeField(default=timezone.now)
     coordinates = models.ForeignKey('map.Coordinates', on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
+    aggregated = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # at any case cehck constraint
@@ -45,6 +49,41 @@ class Report(models.Model):
 
     def __str__(self):
         return "id:{} in ({}) on {}".format(self.id, self.coordinates, self.created_on)
+
+
+@receiver(post_save, sender=Report)
+def aggregate_report_to_slice(sender, instance, **kwargs):
+    try:
+        # if current slice not exist
+        report = instance
+        now = timezone.now()
+        quadrant = Quadrant.objects.find_by_report_coord(report)
+        end_time = now + timezone.timedelta(minutes=REPORT_AGGREGATION_SLICE_DELTA_TIME)
+
+        # if slice existed
+        slice = ReportQuadrantAggregationSlice.objects.get_or_create(
+            start_timestamp__lte=now,
+            end_timestamp__gt=now,
+            quadrant=quadrant,
+            defaults={'start_timestamp': now,
+                      'end_timestamp': end_time}
+        )[0]
+        # todo: usar tiemstamp de los reportes.
+        # Pensandolo superficialmente puede haber colisiones de slices si no se crean en linea.
+        # Al acecptar fecha antiguas, hay que crear los slices mas inteligentemente para que no se sobrepongan rangos de
+        # timestamps
+        if not report.aggregated:
+            slice.report_total_count += 1
+            report.aggregated = True
+            report.save()
+
+        if report.intensity:
+            slice.report_w_intensity_count += 1
+            slice.intensity_sum += report.intensity
+        slice.save()
+
+    except Quadrant.DoesNotExist:
+        print('Warning: Quadrant not found for this report: {}'.format(instance))
 
 
 class MobileUser(models.Model):

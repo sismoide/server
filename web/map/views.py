@@ -18,9 +18,33 @@ class QuadrantsViewSet(mixins.ListModelMixin,
         if min_lat is None or min_long is None or max_lat is None or max_long is None:
             return Quadrant.objects.none()
 
-        return self.queryset.filter(
-            min_coordinates__latitude__gte=min_lat,
+        top_left_corner_quads = self.queryset.filter(
             min_coordinates__longitude__gte=min_long,
-            max_coordinates__latitude__lte=max_lat,
-            max_coordinates__longitude__lte=max_long
+            min_coordinates__longitude__lt=max_long,
+            max_coordinates__latitude__gt=min_lat,
+            max_coordinates__latitude__lte=max_lat
         )
+
+        top_right_corner_quads = self.queryset.filter(
+            max_coordinates__longitude__gt=min_long,
+            max_coordinates__longitude__lte=max_long,
+            max_coordinates__latitude__gt=min_lat,
+            max_coordinates__latitude__lte=max_lat
+        )
+
+        bot_left_corner_quads = self.queryset.filter(
+            min_coordinates__longitude__gte=min_long,
+            min_coordinates__longitude__lt=max_long,
+            min_coordinates__latitude__gte=min_lat,
+            min_coordinates__latitude__lt=max_lat
+        )
+
+        bot_right_corner_quads = self.queryset.filter(
+            max_coordinates__longitude__gt=min_long,
+            max_coordinates__longitude__lte=max_long,
+            min_coordinates__latitude__gte=min_lat,
+            min_coordinates__latitude__lt=max_lat
+        )
+        queryset = (top_left_corner_quads | top_right_corner_quads |
+                    bot_left_corner_quads | bot_right_corner_quads).distinct()
+        return queryset
