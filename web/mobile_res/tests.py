@@ -454,6 +454,7 @@ class QuakeModelTest(TestCase):
         )
 
         cls.quake1 = Quake.objects.create(
+            eventid='quake1',
             coordinates=cls.coord1,
             depth=20,
             magnitude=7.7,
@@ -461,6 +462,7 @@ class QuakeModelTest(TestCase):
         )
 
         cls.quake2 = Quake.objects.create(
+            eventid='quake2',
             coordinates=cls.coord2,
             depth=5.5,
             magnitude=9.3,
@@ -508,6 +510,7 @@ class NearbyQuakeTests(APITestCase):
         )
 
         cls.quake1 = Quake.objects.create(
+            eventid='quake1,',
             coordinates=cls.coord1,
             depth=20,
             magnitude=7.7,
@@ -515,6 +518,7 @@ class NearbyQuakeTests(APITestCase):
         )
 
         cls.quake2 = Quake.objects.create(
+            eventid='quake2',
             coordinates=cls.coord2,
             depth=5.5,
             magnitude=9.3,
@@ -522,6 +526,7 @@ class NearbyQuakeTests(APITestCase):
         )
 
         cls.quake3 = Quake.objects.create(
+            eventid='quake3',
             coordinates=cls.coord1,
             depth=50.4,
             magnitude=6.7,
@@ -529,6 +534,7 @@ class NearbyQuakeTests(APITestCase):
         )
 
         cls.quake4 = Quake.objects.create(
+            eventid='quake4',
             coordinates=cls.coord3,
             depth=40.6,
             magnitude=6.3,
