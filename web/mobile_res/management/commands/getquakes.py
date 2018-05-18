@@ -12,6 +12,7 @@ from mobile_res.models import Quake
 from web.settings import BASE_DIR
 
 
+# get quake data from QuakeML file
 def qmlparse(file):
     tree = etree.parse(file)
     root = tree.getroot()
@@ -41,6 +42,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Started monitoring files")
+
+        # check every minute for new quakes
         schedule.every().minute.do(get_quakes)
 
         while True:
@@ -48,11 +51,14 @@ class Command(BaseCommand):
             time.sleep(1)
 
 
+#Adds quakes to database from files
 def get_quakes():
     print("Getting quakes")
-    # cambiar por la ubicación de los archivos QuakeML
+    # location of QuakeML files
     loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
     files = os.listdir(path=loc)
+
+    #process all files in folder
     if not files:
         print("No files")
     for file in files:
@@ -72,6 +78,7 @@ def get_quakes():
             longitude=longitude
         )
 
+        # check if quake already exists, and add it to database if not
         quake, created = Quake.objects.get_or_create(
             eventid=eventid,
             defaults={'coordinates': coords,
@@ -81,10 +88,12 @@ def get_quakes():
                       'creation_time': creation_time}
         )
 
+        # if quake already exists, update with new data if appropiate
         if not created:
 
             original_creation = quake.creation_time.replace(tzinfo=None)
             new_creation = creation_time
+            # update only if data is newer
             if new_creation > original_creation:
                 quake, created = Quake.objects.update_or_create(
                     eventid=eventid,
@@ -95,6 +104,7 @@ def get_quakes():
                               'timestamp': timestamp}
                 )
 
+    # remove all QuakeML files
     for file in files:
         file_path = os.path.join(loc, file)
         try:
