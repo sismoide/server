@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
 from mobile_res.utils import random_username
+from map.models import Coordinates
 from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
 
 
@@ -121,6 +122,30 @@ class ThreatReport(EventReport):
 
     """
     type = models.ForeignKey(ThreatType, on_delete=models.CASCADE)
+
+
+class Quake(models.Model):
+
+    eventid = models.CharField(primary_key=True, max_length=14)
+    coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
+    depth = models.FloatField(default=0)
+    magnitude = models.FloatField(default=0)
+    timestamp = models.DateTimeField(default=timezone.now())
+    creation_time = models.DateTimeField(default=timezone.now())
+
+    def save(self, *args, **kwargs):
+        if self.depth:
+            if self.depth < 0:
+                raise ValidationError("Negative depth ({} m) not allowed.".format(self.depth))
+
+        if self.magnitude:
+            if self.magnitude < 0:
+                raise ValidationError("Negative magnitude ({}) not allowed".format(self.magnitude))
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "{}: {} quake at {}".format(self.eventid, self.magnitude, self.timestamp)
 
 
 # Auth
