@@ -1,11 +1,14 @@
+import datetime as dt
+import os
+import schedule
+import time
+
 from django.core.management import BaseCommand
 
-import os
-
 from lxml import etree
-import datetime as dt
 
-from mobile_res.models import Quake, Coordinates
+from map.models import Coordinates
+from mobile_res.models import Quake
 from web.settings import BASE_DIR
 
 
@@ -27,39 +30,75 @@ def qmlparse(file):
 
     timestamp = root.find(".//qml:time/qml:value", ns).text
 
+    creation_time = root.find(".//qml:creationTime", ns).text
+
     return eventid, float(latitude), float(longitude), float(depth), \
-           float(magnitude), dt.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
+           float(magnitude), dt.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ"), \
+           dt.datetime.strptime(creation_time, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        # cambiar por la ubicación de los archivos QuakeML
-        loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
+        print("Started monitoring files")
+        schedule.every().minute.do(get_quakes)
 
-        files = os.listdir(path=loc)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
 
-        for file in files:
-            eventid, latitude, longitude, depth, magnitude, timestamp = qmlparse(os.path.join(loc, file))
 
-            print("eventid: "+eventid)
-            print("latitude: "+str(latitude))
-            print("longitude: "+str(longitude))
-            print("depth: "+str(depth))
-            print("magnitude: "+str(magnitude))
-            print("time: "+timestamp.strftime("%Y-%m-%dT%H:%M:%S"))
-            print()
+def get_quakes():
+    print("Getting quakes")
+    # cambiar por la ubicación de los archivos QuakeML
+    loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
+    files = os.listdir(path=loc)
+    if not files:
+        print("No files")
+    for file in files:
+        eventid, latitude, longitude, depth, magnitude, timestamp, creation_time = qmlparse(os.path.join(loc, file))
 
-            coords = Coordinates.objects.create(
-                latitude=latitude,
-                longitude=longitude
-            )
+        print("eventid: " + eventid)
+        print("latitude: " + str(latitude))
+        print("longitude: " + str(longitude))
+        print("depth: " + str(depth))
+        print("magnitude: " + str(magnitude))
+        print("timestamp: " + timestamp.strftime("%Y-%m-%dT%H:%M:%S"))
+        print("creation time: " + creation_time.strftime("%Y-%m-%dT%H:%M:%S"))
+        print()
 
-            quake, created = Quake.objects.get_or_create(
-                eventid=eventid,
-                defaults={'coordinates': coords,
-                          'depth': depth,
-                          'magnitude': magnitude,
-                          'timestamp': timestamp}
-            )
-            #falta terminar
+        coords = Coordinates.objects.create(
+            latitude=latitude,
+            longitude=longitude
+        )
+
+        quake, created = Quake.objects.get_or_create(
+            eventid=eventid,
+            defaults={'coordinates': coords,
+                      'depth': depth,
+                      'magnitude': magnitude,
+                      'timestamp': timestamp,
+                      'creation_time': creation_time}
+        )
+
+        if not created:
+
+            original_creation = quake.creation_time.replace(tzinfo=None)
+            new_creation = creation_time
+            if new_creation > original_creation:
+                quake, created = Quake.objects.update_or_create(
+                    eventid=eventid,
+                    defaults={'creation_time': new_creation,
+                              'coordinates': coords,
+                              'depth': depth,
+                              'magnitude': magnitude,
+                              'timestamp': timestamp}
+                )
+
+    for file in files:
+        file_path = os.path.join(loc, file)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(e)

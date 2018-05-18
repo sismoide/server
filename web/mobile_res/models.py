@@ -131,6 +131,7 @@ class Quake(models.Model):
     depth = models.FloatField(default=0)
     magnitude = models.FloatField(default=0)
     timestamp = models.DateTimeField(default=timezone.now())
+    creation_time = models.DateTimeField(default=timezone.now())
 
     def save(self, *args, **kwargs):
         if self.depth:
