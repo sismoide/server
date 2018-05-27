@@ -219,6 +219,16 @@ class QuadrantsTestCase(APITestCase):
         self.assertGreaterEqual(len(response.data), 1)
         self.assertTrue(res_contain_quads(response, [self.q4, ]))
 
+        # should return 1 quad
+        min_coord_limit = Coordinates.objects.create(longitude=1.1, latitude=2.1)
+        max_coord_limit = Coordinates.objects.create(longitude=1.9, latitude=2.9)
+
+        response = self.client.get(url, get_param_data(min_coord_limit, max_coord_limit),
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data), 1)
+        self.assertTrue(res_contain_quads(response, [self.q7, ]))
+
         # should return 4 quad
         min_coord_limit = Coordinates.objects.create(longitude=1, latitude=0)
         max_coord_limit = Coordinates.objects.create(longitude=3, latitude=2)

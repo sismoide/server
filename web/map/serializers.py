@@ -9,6 +9,18 @@ class CoordinatesSerializer(serializers.ModelSerializer):
         fields = ('latitude', 'longitude')
 
 
+class DummySerializeR(serializers.Serializer):
+    a = serializers.IntegerField()
+    b = serializers.IntegerField()
+
+
+class QuadrantReportSerializer(serializers.Serializer):
+    start_time = serializers.DateTimeField()
+    end_time = serializers.DateTimeField()
+    min_coordinates = CoordinatesSerializer()
+    max_coordinates = CoordinatesSerializer()
+
+
 class QuadrantSerializer(serializers.ModelSerializer):
     min_coordinates = CoordinatesSerializer()
     max_coordinates = CoordinatesSerializer()
