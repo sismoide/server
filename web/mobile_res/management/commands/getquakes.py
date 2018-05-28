@@ -53,25 +53,25 @@ class Command(BaseCommand):
 
 #Adds quakes to database from files
 def get_quakes():
-    print("Getting quakes")
+    #print("Getting quakes")
     # location of QuakeML files
     loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
     files = os.listdir(path=loc)
 
     #process all files in folder
-    if not files:
-        print("No files")
+    #if not files:
+        #print("No files")
     for file in files:
         eventid, latitude, longitude, depth, magnitude, timestamp, creation_time = qmlparse(os.path.join(loc, file))
 
-        print("eventid: " + eventid)
-        print("latitude: " + str(latitude))
-        print("longitude: " + str(longitude))
-        print("depth: " + str(depth))
-        print("magnitude: " + str(magnitude))
-        print("timestamp: " + timestamp.strftime("%Y-%m-%dT%H:%M:%S"))
-        print("creation time: " + creation_time.strftime("%Y-%m-%dT%H:%M:%S"))
-        print()
+        #print("eventid: " + eventid)
+        #print("latitude: " + str(latitude))
+        #print("longitude: " + str(longitude))
+        #print("depth: " + str(depth))
+        #print("magnitude: " + str(magnitude))
+        #print("timestamp: " + timestamp.strftime("%Y-%m-%dT%H:%M:%S"))
+        #print("creation time: " + creation_time.strftime("%Y-%m-%dT%H:%M:%S"))
+        #print()
 
         coords = Coordinates.objects.create(
             latitude=latitude,

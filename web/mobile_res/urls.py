@@ -29,7 +29,7 @@ This piece of code is executed only once, at the beginning.
 
 @async
 def check_quakes():
-    print("Started monitoring files")
+    #print("Started monitoring files")
 
     schedule.every(30).seconds.do(get_quakes)
 
