@@ -493,6 +493,7 @@ class NearbyQuakeTests(APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.token = MobileUser.objects.create_random_mobile_user().token
 
         cls.coord1 = Coordinates.objects.create(
             latitude=-33.45,
@@ -544,7 +545,7 @@ class NearbyQuakeTests(APITestCase):
     def test_get_all_quakes(self):
 
         url = reverse('mobile_res:quake-list')
-        response = self.client.get(url)
+        response = self.client.get(url, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)
@@ -556,7 +557,7 @@ class NearbyQuakeTests(APITestCase):
                 'start': (timezone.now()-timezone.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M"),
                 'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
 
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
@@ -565,7 +566,7 @@ class NearbyQuakeTests(APITestCase):
                 'start': (timezone.now()-timezone.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M"),
                 'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
 
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -573,6 +574,13 @@ class NearbyQuakeTests(APITestCase):
                 'start': (timezone.now()-timezone.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M"),
                 'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
 
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {'latitude': '-33.45', 'longitude': '-70.66'}
+
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
