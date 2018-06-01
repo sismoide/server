@@ -4,7 +4,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from mobile_res import views
-from mobile_res.management.commands.getquakes import get_quakes
+from mobile_res.utils import get_quakes
 from web.utils import async
 
 router = DefaultRouter()
@@ -29,7 +29,6 @@ This piece of code is executed only once, at the beginning.
 
 @async
 def check_quakes():
-    #print("Started monitoring files")
 
     schedule.every(30).seconds.do(get_quakes)
 
