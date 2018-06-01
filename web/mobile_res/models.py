@@ -7,8 +7,8 @@ from django.db import models
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from mobile_res.utils import random_username
 from map.models import Coordinates
+from mobile_res.utils import random_username
 from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
 
 
@@ -30,8 +30,8 @@ class Report(models.Model):
     @ intensity: Mercalli's intensity recorded by user.
 
     """
-    created_on = models.DateTimeField(editable=False, default=timezone.now())
-    modified_on = models.DateTimeField(default=timezone.now())
+    created_on = models.DateTimeField(editable=False, default=timezone.now)
+    modified_on = models.DateTimeField(default=timezone.now)
     coordinates = models.ForeignKey('map.Coordinates', on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
 
