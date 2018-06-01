@@ -126,7 +126,7 @@ class ThreatReport(EventReport):
 
 class Quake(models.Model):
 
-    eventid = models.CharField(primary_key=True, max_length=14)
+    eventid = models.CharField(primary_key=True, max_length=255)
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     depth = models.FloatField(default=0)
     magnitude = models.FloatField(default=0)

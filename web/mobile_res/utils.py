@@ -6,7 +6,7 @@ from math import cos, radians
 from lxml import etree
 
 from map.models import Coordinates
-from mobile_res.models import Quake
+
 from web.settings import BASE_DIR
 
 
@@ -42,6 +42,7 @@ def qmlparse(file):
 
 # Adds quakes to database from files
 def get_quakes():
+    from mobile_res.models import Quake
 
     # location of QuakeML files
     loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
