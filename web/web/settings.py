@@ -168,6 +168,8 @@ CHILE_MIN_LAT = -56  # cabo de hornos
 CHILE_MAX_LONG = - 67  # zona mas al este de Chile
 CHILE_MIN_LONG = -109.546933  # isla de pascua
 
+REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
+
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)

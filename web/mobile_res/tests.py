@@ -227,14 +227,14 @@ class APIResourceTestCase(APITestCase):
         self.assertIsNone(rep.intensity)
         self.assertIsNotNone(rep.created_on)
         self.assertIsNotNone(rep.modified_on)
-        self.assertEqual(rep.created_on.minute, rep.modified_on.minute)
+        #        self.assertEqual(rep.created_on.minute, rep.modified_on.minute)
         past_modified_on = rep.modified_on
         past_created_on = rep.created_on
 
         self.assertIsNotNone(rep.coordinates)
         self.assertEqual(rep.coordinates.latitude, 10)
         self.assertEqual(rep.coordinates.longitude, 14)
-        # self.assertEqual(rep.created_on.second, rep.modified_on.second)
+        #        self.assertEqual(rep.created_on.second, rep.modified_on.second)
         self.assertIsNotNone(rep.modified_on)
         self.assertNotEqual(rep.created_on, rep.modified_on)
 
@@ -249,6 +249,18 @@ class APIResourceTestCase(APITestCase):
         response = self.client.patch(patch_url, data, format='json',
                                      HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Report.objects.count(), 1)
+        self.assertEqual(
+            data['intensity'],
+            Report.objects.get(id=report_id).intensity
+        )
+
+        # try to change intensity again
+        data = {'intensity': 7}
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotEqual(data['intensity'], Report.objects.get(id=report_id).intensity)
         self.assertEqual(Report.objects.count(), 1)
 
         # test data integrity
@@ -265,31 +277,43 @@ class APIResourceTestCase(APITestCase):
         self.assertIsNotNone(rep.modified_on)
 
         # shouldn't be able to change coordinates
-        data = {'coordinates': {'latitude': 10, 'longitude': 15}}
-        with self.assertRaises(AssertionError):
-            response = self.client.patch(patch_url, data, format='json',
-                                         HTTP_AUTHORIZATION="Token {}".format(self.token.key))
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        data = {'coordinates': {'latitude': 66, 'longitude': 77}}
+        # with self.assertRaises(AssertionError):
+        response = self.client.patch(patch_url, data, format='json',
+                                     HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotEqual(
+            data['coordinates']['latitude'],
+            Report.objects.get(id=report_id).coordinates.latitude
+        )
+        self.assertNotEqual(
+            data['coordinates']['longitude'],
+            Report.objects.get(id=report_id).coordinates.longitude
+        )
 
         # shouldn't be able to change dates
         new_time = timezone.now()
         data = {'created_on': new_time}
         response = self.client.patch(patch_url, data, format='json',
                                      HTTP_AUTHORIZATION="Token {}".format(self.token.key))
-        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).created_on)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotEqual(new_time, Report.objects.get(id=report_id).created_on)
 
         new_time = timezone.now()
         data = {'modified_on': new_time}
         response = self.client.patch(patch_url, data, format='json',
                                      HTTP_AUTHORIZATION="Token {}".format(self.token.key))
-        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).modified_on)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotEqual(new_time, Report.objects.get(id=report_id).modified_on)
 
         new_time = timezone.now()
         data = {'created_on': new_time, 'modified_on': new_time}
         response = self.client.patch(patch_url, data, format='json',
                                      HTTP_AUTHORIZATION="Token {}".format(self.token.key))
-        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).modified_on)
-        self.assertNotEqual(new_time, Report.objects.get(id=response.data['id']).created_on)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.assertNotEqual(new_time, Report.objects.get(id=report_id).modified_on)
+        self.assertNotEqual(new_time, Report.objects.get(id=report_id).created_on)
 
         # partial data
         data = {'coordinates': {'latitude': -10, 'longitude': -14}}
