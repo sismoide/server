@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from map.models import Coordinates, Quadrant
+from map.models import Coordinates, Quadrant, ReportQuadrantAggregationSlice
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):
@@ -14,11 +14,14 @@ class DummySerializeR(serializers.Serializer):
     b = serializers.IntegerField()
 
 
-class QuadrantReportSerializer(serializers.Serializer):
-    start_time = serializers.DateTimeField()
-    end_time = serializers.DateTimeField()
-    min_coordinates = CoordinatesSerializer()
-    max_coordinates = CoordinatesSerializer()
+class ReportQuadrantAggregationSliceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportQuadrantAggregationSlice
+        fields = ('start_timestamp',
+                  'end_timestamp',
+                  'report_total_count',
+                  'report_w_intensity_count',
+                  'intensity_sum')
 
 
 class QuadrantSerializer(serializers.ModelSerializer):

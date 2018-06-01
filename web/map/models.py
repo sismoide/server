@@ -70,7 +70,6 @@ class Quadrant(models.Model):
     Also, a dump is saved in 'quadrants.json' fixture
     (load with manage.py loaddata <fixture>).
     """
-    # todo: guardar fixture despues
     min_coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT, related_name='quadrant_min')
     max_coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT, related_name='quadrant_max')
     map_relative_pos_x = models.IntegerField()

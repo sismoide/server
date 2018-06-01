@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -395,3 +396,17 @@ class QuadrantsTestCase(APITestCase):
         self.assertEqual(slice_q4.report_total_count, 2)
         self.assertEqual(slice_q4.report_w_intensity_count, 1)
         self.assertEqual(slice_q4.intensity_sum, 6)
+
+        get_url = reverse('{}:get_quadrant_report_aggregation'.format(MAP_PATH_PREFIX))
+        start_timestamp = timezone.now() - timezone.timedelta(minutes=15)
+        end_timestamp = timezone.now() + timezone.timedelta(minutes=15)
+        response = self.client.get(get_url, {
+            'min_lat': -999,
+            'min_long': -999,
+            'max_lat': 999,
+            'max_long': 999,
+            'start_timestamp': start_timestamp.isoformat(),
+            'end_timestamp': end_timestamp.isoformat()
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)

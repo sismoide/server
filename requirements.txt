@@ -5,4 +5,4 @@ Django==2.0
 djangorestframework==3.7.7
 pytz==2018.3
 django-cors-headers
-
+psycopg2
