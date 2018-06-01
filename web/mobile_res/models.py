@@ -14,6 +14,8 @@ from mobile_res.utils import random_username
 
 from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS, REPORT_AGGREGATION_SLICE_DELTA_TIME
 from map.models import Coordinates
+from mobile_res.utils import random_username
+from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
 
 
 class MobileUserManager(models.Manager):
@@ -170,8 +172,8 @@ class Quake(models.Model):
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     depth = models.FloatField(default=0)
     magnitude = models.FloatField(default=0)
-    timestamp = models.DateTimeField(default=timezone.now())
-    creation_time = models.DateTimeField(default=timezone.now())
+    timestamp = models.DateTimeField(default=timezone.now)
+    creation_time = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
         if self.depth:
