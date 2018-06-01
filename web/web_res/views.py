@@ -1,24 +1,11 @@
-import datetime as dt
-
 from rest_framework import mixins, viewsets, permissions, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from mobile_res.models import Report, EmergencyReport, ThreatReport
+from mobile_res.utils import get_start_and_end_dates
 from web_res.models import WebUser
 from web_res.serializers import ReportSerializer, WebUserChangePasswordSerializer, EmergencySerializer, ThreatSerializer
-
-
-def get_date(request, date_type, default):
-    date = request.query_params.get(date_type, default)
-    return dt.datetime.strptime(date, "%Y-%m-%dT%H:%M")
-
-
-# obtiene las fechas del request
-def getdates(request):
-    start_date = get_date(request, 'start', "1918-01-01T00:00")
-    end_date = get_date(request, 'end', "2100-12-31T23:59")
-    return start_date, end_date
 
 
 class ReportList(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -26,7 +13,7 @@ class ReportList(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ReportSerializer
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(created_on__range=getdates(request))
+        queryset = self.get_queryset().filter(created_on__range=get_start_and_end_dates(request))
         serializer = ReportSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -36,7 +23,7 @@ class EmergencyList(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = EmergencySerializer
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(report__created_on__range=getdates(request))
+        queryset = self.get_queryset().filter(report__created_on__range=get_start_and_end_dates(request))
         serializer = EmergencySerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -46,7 +33,7 @@ class ThreatList(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ThreatSerializer
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(report__created_on__range=getdates(request))
+        queryset = self.get_queryset().filter(report__created_on__range=get_start_and_end_dates(request))
         serializer = ThreatSerializer(queryset, many=True)
         return Response(serializer.data)
 

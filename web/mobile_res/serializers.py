@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from map.serializers import CoordinatesSerializer
-from mobile_res.models import EmergencyReport, ThreatReport, Report
+from mobile_res.models import Report, EmergencyReport, ThreatReport, Quake
 
 
 class ReportCreateSerializer(serializers.ModelSerializer):
@@ -61,3 +61,11 @@ class ThreatReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ThreatReport
         fields = ('type', 'report')
+
+
+class QuakeSerializer(serializers.ModelSerializer):
+    coordinates = CoordinatesSerializer()
+
+    class Meta:
+        model = Quake
+        fields = ('timestamp', 'coordinates', 'depth', 'magnitude')
