@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'i7r2tyl572bx2xa-5(6s*x#pcq-)y9bxk(%ro++lz9)&@t46nj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = Truepsycopg2
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
