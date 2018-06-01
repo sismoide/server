@@ -130,8 +130,8 @@ class Quake(models.Model):
     coordinates = models.ForeignKey(Coordinates, on_delete=models.PROTECT)
     depth = models.FloatField(default=0)
     magnitude = models.FloatField(default=0)
-    timestamp = models.DateTimeField(default=timezone.now())
-    creation_time = models.DateTimeField(default=timezone.now())
+    timestamp = models.DateTimeField(default=timezone.now)
+    creation_time = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
         if self.depth:
