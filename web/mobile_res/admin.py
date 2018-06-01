@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from map.models import Coordinates
-from mobile_res.models import EmergencyType, ThreatType, ThreatReport, EmergencyReport, Report
+from mobile_res.models import EmergencyType, ThreatType, ThreatReport, EmergencyReport, Report, Quake
 
 
 class ReportAdmin(admin.ModelAdmin):
@@ -16,3 +16,5 @@ admin.site.register(ThreatReport)
 admin.site.register(EmergencyReport)
 
 admin.site.register(Coordinates)
+
+admin.site.register(Quake)

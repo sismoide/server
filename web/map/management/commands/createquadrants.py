@@ -25,8 +25,6 @@ class Command(BaseCommand):
             # iterate from south to north
             while current_long < settings.CHILE_MAX_LONG:
                 # build quadrants from west to east
-
-                # todo probar que funciona
                 min_corner_coord = Coordinates.objects.get_or_create(
                     longitude=current_long,
                     latitude=current_lat
