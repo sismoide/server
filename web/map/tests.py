@@ -407,6 +407,7 @@ class QuadrantsTestCase(APITestCase):
             'max_long': 999,
             'start_timestamp': start_timestamp.isoformat(),
             'end_timestamp': end_timestamp.isoformat()
-        })
+        },
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
