@@ -1,6 +1,7 @@
 import datetime as dt
 import os
 import uuid
+from math import cos, radians
 
 from lxml import etree
 
@@ -89,3 +90,41 @@ def get_quakes():
                 os.remove(file_path)
         except Exception as e:
             print(e)
+
+
+# given a request with latitude, longitude, and radius, returns min and max
+# coordinates for surrounding square
+def get_limits(request):
+    # in kilometers
+    radius = float(request.query_params.get('rad', "10.0"))
+
+    # length of 1 degree at the equator (latitude and longitude)
+    km_p_deg_lat = 110.57
+    km_p_deg_long = 111.32
+
+    current_lat = float(request.query_params.get('latitude', "50.0"))
+    current_long = float(request.query_params.get('longitude', "50.0"))
+
+    min_lat = current_lat - (radius/km_p_deg_lat)
+    max_lat = current_lat + (radius/km_p_deg_lat)
+
+    # length of 1 longitude degree (varies with latitude)
+    deg_length = cos(radians(current_lat)) * km_p_deg_long
+
+    min_long = current_long - (radius/deg_length)
+    max_long = current_long + (radius/deg_length)
+
+    return min_lat, max_lat, min_long, max_long
+
+
+# given a date type ("start"/"end") and a default date, gets a date from request parameters.
+def get_date_from_request(request, date_type, default):
+    date = request.query_params.get(date_type, default)
+    return dt.datetime.strptime(date, "%Y-%m-%dT%H:%M")
+
+
+# gets start and end dates from request
+def get_start_and_end_dates(request):
+    start_date = get_date_from_request(request, 'start', "1918-01-01T00:00")
+    end_date = get_date_from_request(request, 'end', "2100-12-31T23:59")
+    return start_date, end_date
