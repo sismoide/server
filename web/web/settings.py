@@ -87,6 +87,13 @@ DATABASES = {
         'PORT': '',
     }
 }
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 # DATABASES = {
 #     'default': {
@@ -170,6 +177,9 @@ CHILE_MIN_LONG = -109.546933  # isla de pascua
 
 REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
 
+from pathlib import Path
+
+QUAKEML_DIR = os.path.join(Path.home(), 'QuakeML')
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)
