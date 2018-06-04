@@ -24,10 +24,11 @@ class Command(BaseCommand):
             if random.uniform(0, 1) > 0.25:
                 intens = int(np.random.normal(5, 1))
 
-            Report.objects.create(
+            r = Report.objects.create(
                 coordinates=Coordinates.objects.create(
                     latitude=lat,
                     longitude=long),
                 intensity=intens
             )
+            print("info: generated report {}".format(r))
             sleep(5)
