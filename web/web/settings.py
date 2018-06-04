@@ -172,7 +172,7 @@ REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
 
 from pathlib import Path
 
-QUAKEML_DIR = os.path.join(Path.home(), 'mercalli', 'QuakeML')
+QUAKEML_DIR = os.path.join(Path.home(), 'QuakeML')
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)
