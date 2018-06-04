@@ -77,23 +77,23 @@ WSGI_APPLICATION = 'web.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'sismoide',
-#         'USER': 'sismoide',
-#         'PASSWORD': 'sismoide123',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'sismoide',
+        'USER': 'sismoide',
+        'PASSWORD': 'sismoide123',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -170,6 +170,7 @@ CHILE_MIN_LONG = -109.546933  # isla de pascua
 
 REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
 
+QUAKEML_DIR = os.path.join('home', 'mercalli', 'QuakeML')
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)
