@@ -170,7 +170,9 @@ CHILE_MIN_LONG = -109.546933  # isla de pascua
 
 REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
 
-QUAKEML_DIR = os.path.join('home', 'mercalli', 'QuakeML')
+from pathlib import Path
+
+QUAKEML_DIR = os.path.join(Path.home(), 'mercalli', 'QuakeML')
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)
