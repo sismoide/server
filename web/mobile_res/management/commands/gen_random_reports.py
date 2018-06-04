@@ -31,4 +31,4 @@ class Command(BaseCommand):
                 intensity=intens
             )
             print("info: generated report {}".format(r))
-            sleep(5)
+            sleep(30)
