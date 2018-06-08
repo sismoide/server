@@ -9,13 +9,11 @@ from django.dispatch import receiver
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+from map.models import Coordinates
 from map.models import ReportQuadrantAggregationSlice, Quadrant
 from mobile_res.utils import random_username
-
-from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS, REPORT_AGGREGATION_SLICE_DELTA_TIME
-from map.models import Coordinates
-from mobile_res.utils import random_username
 from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
+from web.settings import REPORT_AGGREGATION_SLICE_DELTA_TIME
 
 
 class MobileUserManager(models.Manager):
@@ -41,9 +39,10 @@ class Report(models.Model):
     coordinates = models.ForeignKey('map.Coordinates', on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
     aggregated = models.BooleanField(default=False)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # at any case cehck constraint
+        # at any case check constraint
         if self.intensity:
             if self.intensity < 0 or self.intensity > 12:
                 raise ValidationError("intensity out of range, given {}".format(self.intensity))

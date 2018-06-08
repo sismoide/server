@@ -10,9 +10,6 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from map.models import Coordinates
-from mobile_res.models import EmergencyType, ThreatType, ThreatReport, \
-    EmergencyReport, MobileUser, Report
 from mobile_res.models import Coordinates, Report, EmergencyType, ThreatType, ThreatReport, \
     EmergencyReport, Quake, MobileUser
 from mobile_res.utils import random_username
@@ -203,6 +200,7 @@ class APIResourceTestCase(APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.token = MobileUser.objects.create_random_mobile_user().token
+        cls.token2 = MobileUser.objects.create_random_mobile_user().token
 
     def test_partial_report(self):
         """
@@ -353,6 +351,104 @@ class APIResourceTestCase(APITestCase):
         # now check that nonce can't be used again
         res = self.client.post(challenge_url, {'h': challenge_response}, HTTP_AUTHORIZATION=nonce)
         self.assertEqual(status.HTTP_403_FORBIDDEN, res.status_code)
+
+    def test_report_patch(self):
+        post_url = reverse('mobile_res:report-list')
+
+        # post report as user 1
+        data = {'coordinates': {'latitude': 10, 'longitude': 14}}
+        response = self.client.post(
+            post_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token.key)
+        )
+        report_1_id = response.data['id']
+
+        # post report as user 2
+        data = {'coordinates': {'latitude': 11, 'longitude': 15}}
+        response = self.client.post(
+            post_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token2.key)
+        )
+        report_2_id = response.data['id']
+
+        # post report as internal call
+        report_3_id = Report.objects.create(
+            coordinates=Coordinates.objects.create(
+                longitude=16,
+                latitude=12)
+        ).id
+
+        # try to patch
+        data = {'intensity': 4}
+        patch_1_url = reverse('mobile_res:report-detail',
+                              kwargs={'pk': report_1_id})
+        patch_2_url = reverse('mobile_res:report-detail',
+                              kwargs={'pk': report_2_id})
+        patch_3_url = reverse('mobile_res:report-detail',
+                              kwargs={'pk': report_3_id})
+
+        # User 1 cases
+        # try to patch other user's report should fail
+        response = self.client.patch(
+            patch_2_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # try to patch anon report's should pass
+        response = self.client.patch(
+            patch_3_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # user 2 cases
+        # try to patch user 1's report should fail
+        response = self.client.patch(
+            patch_1_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token2.key))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # try to patch it's own report should pass
+        response = self.client.patch(
+            patch_2_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token2.key))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # try to patch anon report already patched should fail
+        response = self.client.patch(
+            patch_3_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # user 1 more cases
+        # try to patch user 2's report again (after user 1 patched), should error
+        response = self.client.patch(
+            patch_2_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # try to patch his own report, should pass
+        response = self.client.patch(
+            patch_1_url,
+            data,
+            format='json',
+            HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class UtilTestCase(TestCase):

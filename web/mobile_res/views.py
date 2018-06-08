@@ -8,7 +8,6 @@ from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerial
     ReportPatchSerializer, QuakeSerializer
 from mobile_res.utils import get_limits, get_start_and_end_dates
 from web.settings import HASH_CLASS
-
 from web_res.serializers import NonceSerializer, ChallengeSerializer, ReportSerializer
 
 
@@ -26,6 +25,41 @@ class ReportViewSet(mixins.CreateModelMixin,
         if self.request.method == 'PATCH':
             serializer_class = ReportPatchSerializer
         return serializer_class
+
+    def create(self, request, *args, **kwargs):
+        ret = super().create(request, *args, **kwargs)
+        if request.user.is_authenticated:
+            # Add information about user whom created the report
+            if ret.status_code == 201:
+                r = Report.objects.get(pk=ret.data['id'])
+                r.creator = request.user
+                r.save()
+        return ret
+
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            # maybe isn't necessary but just in case
+            raise Exception("Patch call not authenticated")
+        try:
+            # get report id from URL call
+            pk = request.path.split("/")[-2]
+            # recover report
+            r = Report.objects.get(pk=pk)
+            if r.creator:
+                # if report is signed
+                if r.creator == request.user:
+                    # and is signed by same user
+                    return super().update(request, *args, **kwargs)
+                else:
+                    # and is signed by other user
+                    return Response({"Tried to patch other user's report"}, status=status.HTTP_403_FORBIDDEN)
+        except IndexError:
+            print("warning: Tried to patch with invalid url {}".format(request.path))
+        except Report.DoesNotExist:
+            print("warning: Tried to patch unexistant report id={}".format(pk))
+
+        # if report's not signed or exception
+        return super().update(request, *args, **kwargs)
 
 
 class EmergencyReportViewSet(mixins.CreateModelMixin,
@@ -63,15 +97,16 @@ class ValidateChallengeAPIView(GenericAPIView):
         return
 
     def post(self, request):
-        # TODO: quitar texto de errores en status 403
         try:
             nonce_key = request.META['HTTP_AUTHORIZATION']
         except KeyError:
-            return Response({'HTTP_AUTHORIZATION header not found'}, status=status.HTTP_403_FORBIDDEN)
+            # HTTP_AUTHORIZATION header not found
+            return Response({}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
-            return Response({'invalid scheme'}, status=status.HTTP_400_BAD_REQUEST)
+            # 'invalid scheme'
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
         validated_data = serializer.validated_data
         response_hash = validated_data['h']
 
@@ -91,10 +126,10 @@ class ValidateChallengeAPIView(GenericAPIView):
                 return Response({'token': str(mobile_user.token)})
             else:
                 # Nonce correct; hash incorrect
-                return Response({"correct nonce, incorrect hash"}, status=403)
+                return Response({}, status=403)
         except Nonce.DoesNotExist:
             # Nonce incorrect or expired
-            return Response({"incorrect nonce or expired"}, status=403)
+            return Response({}, status=403)
 
 
 # get nearby reports

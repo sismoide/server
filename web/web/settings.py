@@ -144,7 +144,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'reports': '20/day',
+        'reports': '20/day',  # todo: change to 1 per minute in production
         'events': '20/day',
         'mobile-read': '8/minute',
         'anon': '12/hour',
