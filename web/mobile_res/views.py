@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from mobile_res.models import EmergencyReport, ThreatReport, Quake, Nonce, MobileUser, Report
 from mobile_res.serializers import ReportCreateSerializer, EmergencyReportSerializer, ThreatReportSerializer, \
     ReportPatchSerializer, QuakeSerializer
-from mobile_res.utils import get_limits, get_start_and_end_dates
-from web.settings import HASH_CLASS
+from mobile_res.utils import get_limits, get_start_and_end_dates, add_points_to_user
+from web.settings import HASH_CLASS, MOBILE_USER_POINTS_REPORT_SUBMIT, MOBILE_USER_POINTS_INTENSITY_UPDATE
 from web_res.serializers import NonceSerializer, ChallengeSerializer, ReportSerializer
 
 
@@ -27,18 +27,34 @@ class ReportViewSet(mixins.CreateModelMixin,
         return serializer_class
 
     def create(self, request, *args, **kwargs):
+        """
+        Called in POST
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         ret = super().create(request, *args, **kwargs)
         if request.user.is_authenticated:
             # Add information about user whom created the report
             if ret.status_code == 201:
+                # if the report is created successfully (201 = OK)
                 r = Report.objects.get(pk=ret.data['id'])
                 r.creator = request.user
                 r.save()
+                add_points_to_user(request.user, MOBILE_USER_POINTS_REPORT_SUBMIT)
         return ret
 
     def update(self, request, *args, **kwargs):
+        """
+        Called in PATCH
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         if not request.user.is_authenticated:
-            # maybe isn't necessary but just in case
+            # maybe isn't necessary, but just in case
             raise Exception("Patch call not authenticated")
         try:
             # get report id from URL call
@@ -49,6 +65,7 @@ class ReportViewSet(mixins.CreateModelMixin,
                 # if report is signed
                 if r.creator == request.user:
                     # and is signed by same user
+                    add_points_to_user(request.user, MOBILE_USER_POINTS_INTENSITY_UPDATE)
                     return super().update(request, *args, **kwargs)
                 else:
                     # and is signed by other user

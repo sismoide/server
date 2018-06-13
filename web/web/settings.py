@@ -173,6 +173,11 @@ REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
 from pathlib import Path
 
 QUAKEML_DIR = os.path.join(Path.home(), 'QuakeML')
+
+# sistema de puntos para usuarios moviles
+MOBILE_USER_POINTS_REPORT_SUBMIT = 1
+MOBILE_USER_POINTS_INTENSITY_UPDATE = 2
+
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)

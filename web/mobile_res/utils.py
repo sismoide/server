@@ -6,6 +6,7 @@ from math import cos, radians
 from lxml import etree
 
 from map.models import Coordinates
+from mobile_res.models import MobileUser
 from web.settings import QUAKEML_DIR
 
 
@@ -128,3 +129,20 @@ def get_start_and_end_dates(request):
     start_date = get_date_from_request(request, 'start', "1918-01-01T00:00")
     end_date = get_date_from_request(request, 'end', "2100-12-31T23:59")
     return start_date, end_date
+
+
+def add_points_to_user(user, points):
+    """
+    Add points to user.
+    :param user: USER whom the points are going to be added.
+    :param points: ammount of points (integer) to be added.
+    :return:
+    """
+    try:
+        m = MobileUser.objects.get(user=user)
+        m.points += points
+        m.save()
+        return 0
+    except MobileUser.DoesNotExist:
+        print("warning: Mobile user not found for auth user. Avoiding points increase.")
+        return -1
