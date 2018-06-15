@@ -101,3 +101,4 @@ class ReportQuadrantAggregationSlice(models.Model):
     report_total_count = models.IntegerField(default=0)
     report_w_intensity_count = models.IntegerField(default=0)
     intensity_sum = models.IntegerField(default=0)
+    points_sum = models.IntegerField(default=0)

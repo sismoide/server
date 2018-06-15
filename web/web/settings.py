@@ -144,7 +144,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'reports': '20/day',
+        'reports': '20/day',  # todo: change to 1 per minute in production
         'events': '20/day',
         'mobile-read': '8/minute',
         'anon': '12/hour',
@@ -168,11 +168,16 @@ CHILE_MIN_LAT = -56  # cabo de hornos
 CHILE_MAX_LONG = - 67  # zona mas al este de Chile
 CHILE_MIN_LONG = -109.546933  # isla de pascua
 
-REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
+REPORT_AGGREGATION_SLICE_DELTA_TIME = 5  # in minutes
 
 from pathlib import Path
 
 QUAKEML_DIR = os.path.join(Path.home(), 'QuakeML')
+
+# sistema de puntos para usuarios moviles
+MOBILE_USER_POINTS_REPORT_SUBMIT = 1
+MOBILE_USER_POINTS_INTENSITY_UPDATE = 2
+
 """
 son 5km oeste-este centro
 (-33.389726, -70.548273)
