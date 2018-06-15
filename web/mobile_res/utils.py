@@ -6,7 +6,6 @@ from math import cos, radians
 from lxml import etree
 
 from map.models import Coordinates
-from mobile_res.models import MobileUser
 from web.settings import QUAKEML_DIR
 
 
@@ -138,6 +137,9 @@ def add_points_to_user(user, points):
     :param points: ammount of points (integer) to be added.
     :return:
     """
+    # local import to avoid circular reference error
+    from mobile_res.models import MobileUser
+
     try:
         m = MobileUser.objects.get(user=user)
         m.points += points

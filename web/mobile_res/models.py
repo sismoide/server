@@ -70,7 +70,7 @@ def aggregate_report_to_slice(sender, instance, **kwargs):
         report = instance
 
         try:
-            m_user = MobileUser.objects.get(user=report.user)
+            m_user = MobileUser.objects.get(user=report.creator)
         except MobileUser.DoesNotExist:
             m_user = None
             print('warning: Mobile user not found for user who submitted a report.')

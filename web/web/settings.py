@@ -168,7 +168,7 @@ CHILE_MIN_LAT = -56  # cabo de hornos
 CHILE_MAX_LONG = - 67  # zona mas al este de Chile
 CHILE_MIN_LONG = -109.546933  # isla de pascua
 
-REPORT_AGGREGATION_SLICE_DELTA_TIME = 15  # in minutes
+REPORT_AGGREGATION_SLICE_DELTA_TIME = 5  # in minutes
 
 from pathlib import Path
 

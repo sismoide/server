@@ -34,16 +34,10 @@ class ReportViewSet(mixins.CreateModelMixin,
         :param kwargs:
         :return:
         """
-        ret = super().create(request, *args, **kwargs)
         if request.user.is_authenticated:
-            # Add information about user whom created the report
-            if ret.status_code == 201:
-                # if the report is created successfully (201 = OK)
-                r = Report.objects.get(pk=ret.data['id'])
-                r.creator = request.user
-                r.save()
-                add_points_to_user(request.user, MOBILE_USER_POINTS_REPORT_SUBMIT)
-        return ret
+            request.data['creator'] = request.user.pk
+            add_points_to_user(request.user, MOBILE_USER_POINTS_REPORT_SUBMIT)
+        return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         """
