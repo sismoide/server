@@ -381,7 +381,7 @@ paths:
         - web
         - general
       summary: Retorna tajadas de tiempo de agregación de reportes a cuadrantes.
-      description: "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```"
+      description: "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat}&min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```"
       operationId: getQuadrantReportSlices
       produces:
         - "application/json"

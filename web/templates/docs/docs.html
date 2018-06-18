@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700"
           rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static "swagger-ui.css" %}">
+
     <style>
         html {
             box-sizing: border-box;
@@ -36,7 +38,7 @@
     window.onload = function () {
 
         var spec = {
-            "swagger": "2.0",
+            "﻿swagger": "2.0",
             "info": {
                 "description": "API for Sismoide.\n",
                 "version": "1.0.0",
@@ -44,7 +46,7 @@
                 "termsOfService": "http://simoide.cl/terms/",
                 "contact": {"email": "admin@sismoide.cl"}
             },
-            "tags": [{"name": "mobile", "description": "Recursos m\u00c3\u00b3viles"}, {
+            "tags": [{"name": "mobile", "description": "Recursos móviles"}, {
                 "name": "web",
                 "description": "Recursos web"
             }, {"name": "general", "description": "Recursos cross-platform"}],
@@ -61,7 +63,7 @@
                             "in": "header",
                             "required": true,
                             "type": "string",
-                            "description": "Token de usuario m\u00c3\u00b3vil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3```"
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3```"
                         }, {
                             "in": "body",
                             "name": "json",
@@ -98,7 +100,7 @@
                             "in": "header",
                             "required": true,
                             "type": "string",
-                            "description": "Token de usuario m\u00c3\u00b3vil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3d4e5```  "
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3d4e5```  "
                         }, {
                             "in": "body",
                             "name": "json",
@@ -126,7 +128,7 @@
                             "in": "header",
                             "required": true,
                             "type": "string",
-                            "description": "Token de usuario m\u00c3\u00b3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
                         }, {
                             "in": "query",
                             "name": "latitude",
@@ -143,17 +145,17 @@
                             "in": "query",
                             "name": "rad",
                             "required": true,
-                            "description": "Radio en kil\u00c3\u00b3metros expresada en decimal. Ejemplo, ```10.00```",
+                            "description": "Radio en kilómetros expresada en decimal. Ejemplo, ```10.00```",
                             "type": "string"
                         }, {
                             "in": "query",
                             "name": "start",
-                            "description": "Hora y d\u00c3\u00ada desde el que se agregan los reportes. Ejemplo, ```1997-07-16T19:20+01:00```",
+                            "description": "Hora y día desde el que se agregan los reportes. Ejemplo, ```1997-07-16T19:20+01:00```",
                             "type": "string"
                         }, {
                             "in": "query",
                             "name": "end",
-                            "description": "Hora y d\u00c3\u00ada hasta el que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```",
+                            "description": "Hora y día hasta el que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```",
                             "type": "string"
                         }],
                         "responses": {
@@ -171,7 +173,7 @@
                     "get": {
                         "tags": ["mobile"],
                         "summary": "Retorna sismos cercanos a un momento y lugar",
-                        "description": "retorna informaci\u00c3\u00b3n de sismos cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_date={start_time}&end_date={end_time}```",
+                        "description": "retorna información de sismos cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_date={start_time}&end_date={end_time}```",
                         "operationId": "getNearbyQuakes",
                         "produces": ["application/json"],
                         "parameters": [{
@@ -179,7 +181,7 @@
                             "in": "header",
                             "required": true,
                             "type": "string",
-                            "description": "Token de usuario m\u00c3\u00b3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
                         }, {
                             "in": "query",
                             "name": "min_lat",
@@ -207,12 +209,12 @@
                         }, {
                             "in": "query",
                             "name": "start_date",
-                            "description": "Hora y d\u00c3\u00ada del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
+                            "description": "Hora y día del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
                             "type": "string"
                         }, {
                             "in": "query",
                             "name": "end_date",
-                            "description": "Hora y d\u00c3\u00ada del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
+                            "description": "Hora y día del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
                             "type": "string"
                         }],
                         "responses": {
@@ -273,12 +275,12 @@
                             "in": "query",
                             "name": "start",
                             "type": "string",
-                            "description": "Hora y d\u00c3\u00ada desde los que se agregan los reportes. Ejemplo, ```1970-07-16T19:20+01:00```"
+                            "description": "Hora y día desde los que se agregan los reportes. Ejemplo, ```1970-07-16T19:20+01:00```"
                         }, {
                             "in": "query",
                             "name": "end",
                             "type": "string",
-                            "description": "Hora y d\u00c3\u00ada hasta los que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```"
+                            "description": "Hora y día hasta los que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```"
                         }],
                         "responses": {
                             "200": {
@@ -299,12 +301,12 @@
                             "in": "query",
                             "name": "start",
                             "type": "string",
-                            "description": "Hora y d\u00c3\u00ada desde los que se agregan las emergencias. Ejemplo, ```1970-07-16T19:20+01:00```"
+                            "description": "Hora y día desde los que se agregan las emergencias. Ejemplo, ```1970-07-16T19:20+01:00```"
                         }, {
                             "in": "query",
                             "name": "end",
                             "type": "string",
-                            "description": "Hora y d\u00c3\u00ada hasta los que se agregan las emergencias. Ejemplo, ```2756-07-16T19:20+01:00```"
+                            "description": "Hora y día hasta los que se agregan las emergencias. Ejemplo, ```2756-07-16T19:20+01:00```"
                         }],
                         "responses": {
                             "200": {
@@ -325,12 +327,12 @@
                             "in": "query",
                             "name": "start",
                             "type": "string",
-                            "description": "Hora y d\u00c3\u00ada desde los que se agregan las amenazas. Ejemplo, ```1970-07-16T19:20+01:00```"
+                            "description": "Hora y día desde los que se agregan las amenazas. Ejemplo, ```1970-07-16T19:20+01:00```"
                         }, {
                             "in": "query",
                             "name": "end",
                             "type": "string",
-                            "description": "Hora y d\u00c3\u00ada hasta los que se agregan las amenazas. Ejemplo, ```2756-07-16T19:20+01:00```"
+                            "description": "Hora y día hasta los que se agregan las amenazas. Ejemplo, ```2756-07-16T19:20+01:00```"
                         }],
                         "responses": {
                             "200": {
@@ -346,7 +348,7 @@
                 "/web/change_pass": {
                     "post": {
                         "tags": ["web"],
-                        "summary": "Cambiar contrase\u00c3\u00b1a de web user",
+                        "summary": "Cambiar contraseña de web user",
                         "consumes": ["application/json"],
                         "parameters": [{
                             "name": "Token",
@@ -380,7 +382,7 @@
                         "parameters": [{
                             "in": "body",
                             "name": "json",
-                            "description": "JSON con usuario y contrase\u00c3\u00b1a",
+                            "description": "JSON con usuario y contraseña",
                             "required": true,
                             "schema": {"$ref": "#/definitions/WebUserAuth"}
                         }],
@@ -395,8 +397,8 @@
                 "/map/quadrant_reports/": {
                     "get": {
                         "tags": ["mobile", "web", "general"],
-                        "summary": "Retorna tajadas de tiempo de agregaci\u00c3\u00b3n de reportes a cuadrantes.",
-                        "description": "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```",
+                        "summary": "Retorna tajadas de tiempo de agregación de reportes a cuadrantes.",
+                        "description": "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat}&min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```",
                         "operationId": "getQuadrantReportSlices",
                         "produces": ["application/json"],
                         "parameters": [{
@@ -404,7 +406,7 @@
                             "in": "header",
                             "required": true,
                             "type": "string",
-                            "description": "Token de usuario m\u00c3\u00b3vil o web. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+                            "description": "Token de usuario móvil o web. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
                         }, {
                             "in": "query",
                             "name": "min_lat",
@@ -432,13 +434,13 @@
                         }, {
                             "in": "query",
                             "name": "start_timestamp",
-                            "description": "Hora y d\u00c3\u00ada del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
+                            "description": "Hora y día del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
                             "type": "string",
                             "required": true
                         }, {
                             "in": "query",
                             "name": "end_timestamp",
-                            "description": "Hora y d\u00c3\u00ada del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
+                            "description": "Hora y día del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
                             "type": "string",
                             "required": true
                         }],
