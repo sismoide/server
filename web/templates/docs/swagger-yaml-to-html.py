@@ -45,8 +45,8 @@ TEMPLATE = """
 
 <div id="swagger-ui"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui-bundle.js"> </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui-standalone-preset.js"> </script>
+<script src="{%% static "swagger-ui-bundle.js" %%}"> </script>
+<script src="{%% static "swagger-ui-standalone-preset.js" %%}"> </script>
 <script>
 window.onload = function() {
 
