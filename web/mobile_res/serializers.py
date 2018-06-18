@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -9,11 +10,12 @@ from mobile_res.models import Report, EmergencyReport, ThreatReport, Quake
 class ReportCreateSerializer(serializers.ModelSerializer):
     coordinates = CoordinatesSerializer()
     intensity = serializers.IntegerField(required=False)
-    created_on = serializers.DateTimeField(default=timezone.now())
+    created_on = serializers.DateTimeField(default=timezone.now)
+    creator = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())
 
     class Meta:
         model = Report
-        fields = ('id', 'coordinates', 'intensity', 'created_on')
+        fields = ('id', 'coordinates', 'intensity', 'created_on', 'creator')
 
     def create(self, validated_data):
         # workaround for allowing nested creation of coordinates inside report
@@ -24,12 +26,16 @@ class ReportCreateSerializer(serializers.ModelSerializer):
                 coordinates=coordinates,
                 intensity=validated_data.pop('intensity'),
                 modified_on=timezone.now(),
-                created_on=validated_data.pop('created_on'))
+                created_on=validated_data.pop('created_on'),
+                creator=validated_data.pop('creator')
+            )
         except KeyError:
             report, created = Report.objects.update_or_create(
                 coordinates=coordinates,
                 modified_on=timezone.now(),
-                created_on=validated_data.pop('created_on'))
+                created_on=validated_data.pop('created_on'),
+                creator=validated_data.pop('creator')
+            )
         return report
 
 

@@ -9,13 +9,11 @@ from django.dispatch import receiver
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+from map.models import Coordinates
 from map.models import ReportQuadrantAggregationSlice, Quadrant
 from mobile_res.utils import random_username
-
-from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS, REPORT_AGGREGATION_SLICE_DELTA_TIME
-from map.models import Coordinates
-from mobile_res.utils import random_username
-from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS
+from web.settings import NONCE_EXPIRATION_TIME, HASH_CLASS, MOBILE_USER_POINTS_INTENSITY_UPDATE
+from web.settings import REPORT_AGGREGATION_SLICE_DELTA_TIME
 
 
 class MobileUserManager(models.Manager):
@@ -41,9 +39,10 @@ class Report(models.Model):
     coordinates = models.ForeignKey('map.Coordinates', on_delete=models.PROTECT)
     intensity = models.IntegerField(blank=True, null=True)
     aggregated = models.BooleanField(default=False)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # at any case cehck constraint
+        # at any case check constraint
         if self.intensity:
             if self.intensity < 0 or self.intensity > 12:
                 raise ValidationError("intensity out of range, given {}".format(self.intensity))
@@ -57,14 +56,30 @@ class Report(models.Model):
 
 @receiver(post_save, sender=Report)
 def aggregate_report_to_slice(sender, instance, **kwargs):
+    """
+    Logic to create and update report-slice information.
+    This function is called on_create and on_update report; so can be called twice for each report.
+    :param sender:
+    :param instance:
+    :param kwargs:
+    :return:
+    """
     try:
-        # if current slice not exist
+
+        # gather neccesary variables
         report = instance
+
+        try:
+            m_user = MobileUser.objects.get(user=report.creator)
+        except MobileUser.DoesNotExist:
+            m_user = None
+            print('warning: Mobile user not found for user who submitted a report.')
+
         now = timezone.now()
         quadrant = Quadrant.objects.find_by_report_coord(report)
         end_time = now + timezone.timedelta(minutes=REPORT_AGGREGATION_SLICE_DELTA_TIME)
 
-        # if slice existed
+        # get or create slice
         slice = ReportQuadrantAggregationSlice.objects.get_or_create(
             start_timestamp__lte=now,
             end_timestamp__gt=now,
@@ -76,18 +91,31 @@ def aggregate_report_to_slice(sender, instance, **kwargs):
         # Pensandolo superficialmente puede haber colisiones de slices si no se crean en linea.
         # Al acecptar fecha antiguas, hay que crear los slices mas inteligentemente para que no se sobrepongan rangos de
         # timestamps
+
+        # aggregate new data to slice
         if not report.aggregated:
+            # this scope is called only once (at report creation)
             slice.report_total_count += 1
+            if m_user:
+                # Add user's points for confidence notion
+                slice.points_sum += m_user.points
             report.aggregated = True
             report.save()
 
         if report.intensity:
+            # this scope is called only once (at report patch [theorically can be called on creation
+            # but irl intensity is submitted via patch just once])
             slice.report_w_intensity_count += 1
             slice.intensity_sum += report.intensity
+            # NOTA: ESTO ES UN HACK QUE FUNCIONA LA MAYORIA DE LAS VECES; Y CUANDO NO, EL ERROR NO ES TAN GRAVE.
+            # EXPLICACION: En la practica por cada reporte se hace un POST sin intensidad y un PATCH de la intensidad,
+            # cuando es así, este hack funciona sin error. Este hack falla si se hace POST con intensidad (se introduce
+            # un error en +2 puntos)
+            slice.points_sum += MOBILE_USER_POINTS_INTENSITY_UPDATE
         slice.save()
 
     except Quadrant.DoesNotExist:
-        print('Warning: Quadrant not found for this report: {}'.format(instance))
+        print('warning: Quadrant not found for this report: {}'.format(instance))
 
 
 class MobileUser(models.Model):
@@ -103,6 +131,7 @@ class MobileUser(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.OneToOneField(Token, null=True, blank=True, on_delete=models.SET_NULL)
+    points = models.IntegerField(default=0)
     objects = MobileUserManager()
 
     def save(self, *args, **kwargs):
