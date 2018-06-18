@@ -2,786 +2,683 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Swagger UI</title>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui.css" >
-  <style>
-    html
-    {
-      box-sizing: border-box;
-      overflow: -moz-scrollbars-vertical;
-      overflow-y: scroll;
-    }
-    *,
-    *:before,
-    *:after
-    {
-      box-sizing: inherit;
-    }
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700"
+          rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static "swagger-ui.css" %}">
 
-    body {
-      margin:0;
-      background: #fafafa;
-    }
-  </style>
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+    </style>
 </head>
 <body>
 
 <div id="swagger-ui"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui-bundle.js"> </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui-standalone-preset.js"> </script>
+<script src="{% static "swagger-ui-bundle.js" %}"></script>
+<script src="{% static "swagger-ui-standalone-preset.js" %}"></script>
 <script>
-window.onload = function() {
+    window.onload = function () {
 
-    var spec = {
-        "swagger": "2.0",
-        "info": {
-            "description": "API for Sismoide.\n",
-            "version": "1.0.0",
-            "title": "Sismoide API",
-            "termsOfService": "http://simoide.cl/terms/",
-            "contact": {"email": "admin@sismoide.cl"}
-        },
-        "tags": [{"name": "mobile", "description": "Recursos m\u00f3viles"}, {
-            "name": "web",
-            "description": "Recursos web"
-        }, {"name": "general", "description": "Recursos cross-platform"}],
-        "paths": {
-            "/mobile/reports": {
-                "post": {
-                    "tags": ["mobile"],
-                    "summary": "Agregar nuevo reporte (parcial o completo)",
-                    "operationId": "addReport",
-                    "consumes": ["application/json"],
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3```"
-                    }, {
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con datos de reporte, soporta datos parciales o completos. El unico campo requerido son las coordenadas.",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/ReportComplete"}
-                    }],
-                    "responses": {
-                        "201": {
-                            "description": "report submitted",
-                            "schema": {"$ref": "#/definitions/PostResponseReport"}
+        var spec = {
+            "﻿swagger": "2.0",
+            "info": {
+                "description": "API for Sismoide.\n",
+                "version": "1.0.0",
+                "title": "Sismoide API",
+                "termsOfService": "http://simoide.cl/terms/",
+                "contact": {"email": "admin@sismoide.cl"}
+            },
+            "tags": [{"name": "mobile", "description": "Recursos móviles"}, {
+                "name": "web",
+                "description": "Recursos web"
+            }, {"name": "general", "description": "Recursos cross-platform"}],
+            "paths": {
+                "/mobile/reports": {
+                    "post": {
+                        "tags": ["mobile"],
+                        "summary": "Agregar nuevo reporte (parcial o completo)",
+                        "operationId": "addReport",
+                        "consumes": ["application/json"],
+                        "produces": ["application/json"],
+                        "parameters": [{
+                            "name": "Token",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3```"
+                        }, {
+                            "in": "body",
+                            "name": "json",
+                            "description": "JSON con datos de reporte, soporta datos parciales o completos. El unico campo requerido son las coordenadas.",
+                            "required": true,
+                            "schema": {"$ref": "#/definitions/ReportComplete"}
+                        }],
+                        "responses": {
+                            "201": {
+                                "description": "report submitted",
+                                "schema": {"$ref": "#/definitions/PostResponseReport"}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/reports/{id}": {
-                "patch": {
-                    "tags": ["mobile"],
-                    "summary": "Agrega intensidad al reporte",
-                    "operationId": "patchReport",
-                    "consumes": ["application/json"],
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "in": "path",
-                        "name": "id",
-                        "required": true,
-                        "description": "Id de reporte que se agrega intensidad",
-                        "type": "string"
-                    }, {
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con datos de intensidad para actualizar el reporte",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/Intensity"}
-                    }],
-                    "responses": {
-                        "200": {"description": "Ok"},
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/nearby_reports": {
-                "get": {
-                    "tags": ["mobile"],
-                    "summary": "Retorna reportes cercanos a un momento y lugar",
-                    "description": "retorna reportes cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_reports?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```",
-                    "operationId": "getNearbyReports",
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "query",
-                        "name": "latitude",
-                        "description": "Latitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "longitude",
-                        "description": "Longitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "rad",
-                        "required": true,
-                        "description": "Radio en kil\u00f3metros expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string"
-                    }, {
-                        "in": "query",
-                        "name": "start",
-                        "description": "Hora y d\u00eda desde el que se agregan los reportes. Ejemplo, ```1997-07-16T19:20+01:00```",
-                        "type": "string"
-                    }, {
-                        "in": "query",
-                        "name": "end",
-                        "description": "Hora y d\u00eda hasta el que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```",
-                        "type": "string"
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/ReportComplete"}}
+                        "security": [{"mobile_token": []}]
+                    }
+                },
+                "/mobile/reports/{id}": {
+                    "patch": {
+                        "tags": ["mobile"],
+                        "summary": "Agrega intensidad al reporte",
+                        "operationId": "patchReport",
+                        "consumes": ["application/json"],
+                        "produces": ["application/json"],
+                        "parameters": [{
+                            "in": "path",
+                            "name": "id",
+                            "required": true,
+                            "description": "Id de reporte que se agrega intensidad",
+                            "type": "string"
+                        }, {
+                            "name": "Token",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. Ejemplo, ```Authorization: Token a1b2c3d4e5```  "
+                        }, {
+                            "in": "body",
+                            "name": "json",
+                            "description": "JSON con datos de intensidad para actualizar el reporte",
+                            "required": true,
+                            "schema": {"$ref": "#/definitions/Intensity"}
+                        }],
+                        "responses": {
+                            "200": {"description": "Ok"},
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/nearby_quakes": {
-                "get": {
-                    "tags": ["mobile"],
-                    "summary": "Retorna sismos cercanos a un momento y lugar",
-                    "description": "retorna informaci\u00f3n de sismos cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_date={start_time}&end_date={end_time}```",
-                    "operationId": "getNearbyQuakes",
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "query",
-                        "name": "min_lat",
-                        "description": "Minima latitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "max_lat",
-                        "description": "Maxima latitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "min_long",
-                        "description": "Minima longitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "max_long",
-                        "description": "Maxima longitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "start_date",
-                        "description": "Hora y d\u00eda del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
-                        "type": "string"
-                    }, {
-                        "in": "query",
-                        "name": "end_date",
-                        "description": "Hora y d\u00eda del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
-                        "type": "string"
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/Quake"}}
+                        "security": [{"mobile_token": []}]
+                    }
+                },
+                "/mobile/nearbyreports": {
+                    "get": {
+                        "tags": ["mobile"],
+                        "summary": "Retorna reportes cercanos a un momento y lugar",
+                        "description": "retorna reportes cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_reports?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```",
+                        "operationId": "getNearbyReports",
+                        "produces": ["application/json"],
+                        "parameters": [{
+                            "name": "Token",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+                        }, {
+                            "in": "query",
+                            "name": "latitude",
+                            "description": "Latitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "longitude",
+                            "description": "Longitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "rad",
+                            "required": true,
+                            "description": "Radio en kilómetros expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string"
+                        }, {
+                            "in": "query",
+                            "name": "start",
+                            "description": "Hora y día desde el que se agregan los reportes. Ejemplo, ```1997-07-16T19:20+01:00```",
+                            "type": "string"
+                        }, {
+                            "in": "query",
+                            "name": "end",
+                            "description": "Hora y día hasta el que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```",
+                            "type": "string"
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "schema": {"type": "array", "items": {"$ref": "#/definitions/ReportComplete"}}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/nearby_emergencies": {
-                "get": {
-                    "deprecated": true,
-                    "tags": ["mobile"],
-                    "summary": "Retorna reportes de emergencia cercanos a un momento y lugar",
-                    "description": "retorna emergencias emitidas cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```",
-                    "operationId": "getNearbyEmergencies",
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "query",
-                        "name": "latitude",
-                        "description": "Latitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "longitude",
-                        "description": "Longitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "rad",
-                        "required": true,
-                        "description": "Radio en kil\u00f3metros expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string"
-                    }, {
-                        "in": "query",
-                        "name": "start",
-                        "description": "Hora y d\u00eda desde el que se agregan los reportes de emergencia. Ejemplo, ```1997-07-16T19:20+01:00```",
-                        "type": "string"
-                    }, {
-                        "in": "query",
-                        "name": "end",
-                        "description": "Hora y d\u00eda del evento hasta el que se agregan los reportes de emergencia. Ejemplo, ```2756-07-16T19:20+01:00```",
-                        "type": "string"
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/ExpandedReportEvent"}}
+                        "security": [{"mobile_token": []}]
+                    }
+                },
+                "/mobile/nearbyquakes": {
+                    "get": {
+                        "tags": ["mobile"],
+                        "summary": "Retorna sismos cercanos a un momento y lugar",
+                        "description": "retorna información de sismos cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_date={start_time}&end_date={end_time}```",
+                        "operationId": "getNearbyQuakes",
+                        "produces": ["application/json"],
+                        "parameters": [{
+                            "name": "Token",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+                        }, {
+                            "in": "query",
+                            "name": "min_lat",
+                            "description": "Minima latitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "max_lat",
+                            "description": "Maxima latitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "min_long",
+                            "description": "Minima longitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "max_long",
+                            "description": "Maxima longitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "start_date",
+                            "description": "Hora y día del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
+                            "type": "string"
+                        }, {
+                            "in": "query",
+                            "name": "end_date",
+                            "description": "Hora y día del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
+                            "type": "string"
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "schema": {"type": "array", "items": {"$ref": "#/definitions/Quake"}}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/threats": {
-                "post": {
-                    "tags": ["mobile"],
-                    "summary": "Agregar nueva amenaza a un reporte.",
-                    "operationId": "addThreat",
-                    "consumes": ["application/json"],
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con id de tipo de amenaza y del reporte al que se agregar\u00e1.",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/ReportEvent"}
-                    }],
-                    "responses": {
-                        "201": {
-                            "description": "Threat submitted",
-                            "schema": {"$ref": "#/definitions/ReportEvent"}
+                        "security": [{"mobile_token": []}]
+                    }
+                },
+                "/mobile/nonce": {
+                    "post": {
+                        "tags": ["mobile"],
+                        "summary": "Pide nonce para calcular challenge",
+                        "operationId": "getNonce",
+                        "produces": ["application/json"],
+                        "responses": {"201": {"description": "Ok.", "schema": {"$ref": "#/definitions/Nonce"}}}
+                    }
+                },
+                "/mobile/challenge": {
+                    "post": {
+                        "tags": ["mobile"],
+                        "summary": "Crear usuario movil, por medio de challenge del Nonce",
+                        "operationId": "addMobileUser",
+                        "consumes": ["application/json"],
+                        "produces": ["application/json"],
+                        "parameters": [{
+                            "name": "Authorization",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Nonce a challengear. \n Ejemplo:\n ```Authorization: z1b2n3n4m5```"
+                        }, {
+                            "in": "body",
+                            "name": "json",
+                            "description": "JSON con respuesta al challenge.",
+                            "required": true,
+                            "schema": {"$ref": "#/definitions/Challenge"}
+                        }],
+                        "responses": {
+                            "201": {
+                                "description": "Mobile user created",
+                                "schema": {"$ref": "#/definitions/Token"}
+                            },
+                            "403": {"description": "Incorrect nonce, expired, challenge response is wrong"},
+                            "400": {"description": "Invalid JSON"}
+                        }
+                    }
+                },
+                "/web/reports": {
+                    "get": {
+                        "tags": ["web"],
+                        "summary": "Lista reportes agregados en cierto momento",
+                        "parameters": [{
+                            "in": "query",
+                            "name": "start",
+                            "type": "string",
+                            "description": "Hora y día desde los que se agregan los reportes. Ejemplo, ```1970-07-16T19:20+01:00```"
+                        }, {
+                            "in": "query",
+                            "name": "end",
+                            "type": "string",
+                            "description": "Hora y día hasta los que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```"
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "schema": {"type": "array", "items": {"$ref": "#/definitions/ReportComplete"}}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/emergencies": {
-                "post": {
-                    "tags": ["mobile"],
-                    "summary": "Agregar nueva emergencia a un reporte",
-                    "operationId": "addEmergency",
-                    "consumes": ["application/json"],
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con id de tipo de emergencia y del reporte al que se agregar\u00e1",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/ReportEvent"}
-                    }],
-                    "responses": {
-                        "201": {
-                            "description": "Emergency submitted",
-                            "schema": {"$ref": "#/definitions/ReportEvent"}
+                        "security": [{"web_token": []}]
+                    }
+                },
+                "/web/emergencies": {
+                    "get": {
+                        "tags": ["web"],
+                        "summary": "Lista emergencias agregadas en cierto momento",
+                        "parameters": [{
+                            "in": "query",
+                            "name": "start",
+                            "type": "string",
+                            "description": "Hora y día desde los que se agregan las emergencias. Ejemplo, ```1970-07-16T19:20+01:00```"
+                        }, {
+                            "in": "query",
+                            "name": "end",
+                            "type": "string",
+                            "description": "Hora y día hasta los que se agregan las emergencias. Ejemplo, ```2756-07-16T19:20+01:00```"
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "schema": {"type": "array", "items": {"$ref": "#/definitions/ExpandedReportEvent"}}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            },
-            "/mobile/nonce": {
-                "post": {
-                    "tags": ["mobile"],
-                    "summary": "Pide nonce para calcular challenge",
-                    "operationId": "getNonce",
-                    "produces": ["application/json"],
-                    "responses": {"201": {"description": "Ok.", "schema": {"$ref": "#/definitions/Nonce"}}}
-                }
-            },
-            "/mobile/challenge": {
-                "post": {
-                    "tags": ["mobile"],
-                    "summary": "Crear usuario movil, por medio de challenge del Nonce",
-                    "operationId": "addMobileUser",
-                    "consumes": ["application/json"],
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Nonce a challengear. \n Ejemplo:\n ```Authorization: z1b2n3n4m5```"
-                    }, {
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con respuesta al challenge.",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/Challenge"}
-                    }],
-                    "responses": {
-                        "201": {
-                            "description": "Mobile user created",
-                            "schema": {"$ref": "#/definitions/Token"}
+                        "security": [{"web_token": []}]
+                    }
+                },
+                "/web/threats": {
+                    "get": {
+                        "tags": ["web"],
+                        "summary": "Lista amenazas agregadas en cierto momento",
+                        "parameters": [{
+                            "in": "query",
+                            "name": "start",
+                            "type": "string",
+                            "description": "Hora y día desde los que se agregan las amenazas. Ejemplo, ```1970-07-16T19:20+01:00```"
+                        }, {
+                            "in": "query",
+                            "name": "end",
+                            "type": "string",
+                            "description": "Hora y día hasta los que se agregan las amenazas. Ejemplo, ```2756-07-16T19:20+01:00```"
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "schema": {"type": "array", "items": {"$ref": "#/definitions/ExpandedReportEvent"}}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
                         },
-                        "403": {"description": "Incorrect nonce, expired, challenge response is wrong"},
-                        "400": {"description": "Invalid JSON"}
+                        "security": [{"web_token": []}]
+                    }
+                },
+                "/web/change_pass": {
+                    "post": {
+                        "tags": ["web"],
+                        "summary": "Cambiar contraseña de web user",
+                        "consumes": ["application/json"],
+                        "parameters": [{
+                            "name": "Token",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Token de usuario web creado desde panel Admin. Ejemplo, ```Authorization: Token a1b2c3```"
+                        }, {
+                            "in": "body",
+                            "name": "json",
+                            "description": "JSON con nueva password",
+                            "required": true,
+                            "schema": {"$ref": "#/definitions/Password"}
+                        }],
+                        "responses": {
+                            "201": {
+                                "description": "Password changed. New token generated",
+                                "schema": {"$ref": "#/definitions/Token"}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
+                        },
+                        "security": [{"web_token": []}]
+                    }
+                },
+                "/web/get_token": {
+                    "post": {
+                        "tags": ["web"],
+                        "summary": "Obtener token de usuario web a partir de credenciales",
+                        "consumes": ["application/json"],
+                        "parameters": [{
+                            "in": "body",
+                            "name": "json",
+                            "description": "JSON con usuario y contraseña",
+                            "required": true,
+                            "schema": {"$ref": "#/definitions/WebUserAuth"}
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "Web user authenticated correctly",
+                                "schema": {"$ref": "#/definitions/Token"}
+                            }, "403": {"description": "Invalid JSON ocheme or credentials"}
+                        }
+                    }
+                },
+                "/map/quadrant_reports/": {
+                    "get": {
+                        "tags": ["mobile", "web", "general"],
+                        "summary": "Retorna tajadas de tiempo de agregación de reportes a cuadrantes.",
+                        "description": "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat}&min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```",
+                        "operationId": "getQuadrantReportSlices",
+                        "produces": ["application/json"],
+                        "parameters": [{
+                            "name": "Token",
+                            "in": "header",
+                            "required": true,
+                            "type": "string",
+                            "description": "Token de usuario móvil o web. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+                        }, {
+                            "in": "query",
+                            "name": "min_lat",
+                            "description": "Minima latitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "max_lat",
+                            "description": "Maxima latitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "min_long",
+                            "description": "Minima longitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "max_long",
+                            "description": "Maxima longitud expresada en decimal. Ejemplo, ```10.00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "start_timestamp",
+                            "description": "Hora y día del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
+                            "type": "string",
+                            "required": true
+                        }, {
+                            "in": "query",
+                            "name": "end_timestamp",
+                            "description": "Hora y día del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
+                            "type": "string",
+                            "required": true
+                        }],
+                        "responses": {
+                            "200": {
+                                "description": "OK",
+                                "schema": {"type": "array", "items": {"$ref": "#/definitions/QuadrantReportSlice"}}
+                            },
+                            "403": {"description": "Invalid mobile user credential (token)"},
+                            "400": {"description": "Invalid JSON scheme"}
+                        },
+                        "security": [{"mobile_token": []}]
                     }
                 }
             },
-            "/web/reports": {
-                "get": {
-                    "tags": ["web"],
-                    "summary": "Lista reportes agregados en cierto momento",
-                    "parameters": [{
-                        "in": "query",
-                        "name": "start",
-                        "type": "string",
-                        "description": "Hora y d\u00eda desde los que se agregan los reportes. Ejemplo, ```1970-07-16T19:20+01:00```"
-                    }, {
-                        "in": "query",
-                        "name": "end",
-                        "type": "string",
-                        "description": "Hora y d\u00eda hasta los que se agregan los reportes. Ejemplo, ```2756-07-16T19:20+01:00```"
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/ReportComplete"}}
+            "securityDefinitions": {
+                "mobile_token": {"type": "apiKey", "name": "Token", "in": "header"},
+                "web_token": {"type": "apiKey", "name": "Token", "in": "header"},
+                "any_token": {"type": "apiKey", "name": "Token", "in": "header"}
+            },
+            "definitions": {
+                "EventType": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "example": 110,
+                            "description": "Event (Threat or Emergency) id"
+                        }, "title": {"type": "string", "example": "Restos vegetales en el suelo"}
+                    }
+                },
+                "Coordinates": {
+                    "type": "object",
+                    "properties": {
+                        "latitude": {"type": "number", "format": "float", "example": -70.666667},
+                        "longitude": {"type": "number", "format": "float", "example": -33.45}
+                    }
+                },
+                "ReportComplete": {
+                    "type": "object",
+                    "properties": {
+                        "coordinates": {"$ref": "#/definitions/Coordinates"},
+                        "intensity": {"type": "integer", "description": "Not required", "minimum": 1, "maximum": 12},
+                        "created_on": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Not required but suggested; ISO 8601 specification",
+                            "example": "2018-04-20T16:20+01:00"
+                        }
+                    }
+                },
+                "Intensity": {
+                    "type": "object",
+                    "properties": {
+                        "intensity": {
+                            "type": "integer",
+                            "default": null,
+                            "example": 6,
+                            "minimum": 1,
+                            "maximum": 12
+                        }
+                    }
+                },
+                "PostResponseReport": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "description": "report id"},
+                        "coordinates": {"$ref": "#/definitions/Coordinates"},
+                        "intensity": {
+                            "type": "integer",
+                            "description": "Not required",
+                            "default": null,
+                            "example": 5,
+                            "minimum": 1,
+                            "maximum": 12
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"web_token": []}]
-                }
-            },
-            "/web/emergencies": {
-                "get": {
-                    "tags": ["web"],
-                    "summary": "Lista emergencias agregadas en cierto momento",
-                    "parameters": [{
-                        "in": "query",
-                        "name": "start",
-                        "type": "string",
-                        "description": "Hora y d\u00eda desde los que se agregan las emergencias. Ejemplo, ```1970-07-16T19:20+01:00```"
-                    }, {
-                        "in": "query",
-                        "name": "end",
-                        "type": "string",
-                        "description": "Hora y d\u00eda hasta los que se agregan las emergencias. Ejemplo, ```2756-07-16T19:20+01:00```"
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/ExpandedReportEvent"}}
+                        "created_on": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Not required but suggested; ISO 8601 specification",
+                            "example": "2018-04-20T16:20+01:00"
+                        }
+                    }
+                },
+                "ReportEvent": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "integer",
+                            "description": "threat or emergency type id",
+                            "example": 21
+                        }, "report": {"type": "integer", "description": "report id", "example": 110}
+                    }
+                },
+                "ExpandedReportEvent": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "integer",
+                            "description": "threat or emergency type id",
+                            "example": 7
+                        }, "report": {"$ref": "#/definitions/ReportComplete"}
+                    }
+                },
+                "Challenge": {
+                    "type": "object",
+                    "properties": {
+                        "h": {
+                            "type": "string",
+                            "description": "response to challenge in exchange for a new mobile user",
+                            "example": "a1b2cv3"
+                        }
+                    }
+                },
+                "Token": {
+                    "type": "object",
+                    "properties": {
+                        "token": {
+                            "type": "string",
+                            "description": "brand new mobile user's Token. Save it carefully.",
+                            "example": "a1b2cv3"
+                        }
+                    }
+                },
+                "Nonce": {"type": "object", "properties": {"key": {"type": "string", "example": "a1b2cv3"}}},
+                "Password": {"type": "object", "properties": {"password": {"type": "string", "minLength": 8}}},
+                "WebUserAuth": {
+                    "type": "object",
+                    "properties": {
+                        "username": {"type": "string", "example": "juanito"},
+                        "password": {"type": "string", "example": "juanitosutsutsut"}
+                    }
+                },
+                "Quake": {
+                    "type": "object",
+                    "properties": {
+                        "magnitude": {"type": "number", "format": "float", "example": 8.87},
+                        "depth": {"type": "number", "format": "float", "example": 300.34},
+                        "timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 specification",
+                            "example": "2018-04-20T16:20+01:00"
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"web_token": []}]
-                }
-            },
-            "/web/threats": {
-                "get": {
-                    "tags": ["web"],
-                    "summary": "Lista amenazas agregadas en cierto momento",
-                    "parameters": [{
-                        "in": "query",
-                        "name": "start",
-                        "type": "string",
-                        "description": "Hora y d\u00eda desde los que se agregan las amenazas. Ejemplo, ```1970-07-16T19:20+01:00```"
-                    }, {
-                        "in": "query",
-                        "name": "end",
-                        "type": "string",
-                        "description": "Hora y d\u00eda hasta los que se agregan las amenazas. Ejemplo, ```2756-07-16T19:20+01:00```"
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/ExpandedReportEvent"}}
+                        "coordinates": {"$ref": "#/definitions/Coordinates"}
+                    }
+                },
+                "QuadrantReportSlice": {
+                    "type": "object",
+                    "properties": {
+                        "quadrant_data": {"$ref": "#/definitions/Quadrant"},
+                        "slices_data": {"type": "array", "items": {"$ref": "#/definitions/SliceData"}}
+                    }
+                },
+                "Quadrant": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "description": "Id of quadrant stored in DB."},
+                        "min_coordinates": {
+                            "$ref": "#/definitions/Coordinates",
+                            "description": "Bottom-Left coordinates of the Quadrant square."
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"web_token": []}]
-                }
-            },
-            "/web/change_pass": {
-                "post": {
-                    "tags": ["web"],
-                    "summary": "Cambiar contrase\u00f1a de web user",
-                    "consumes": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario web creado desde panel Admin. Ejemplo, ```Authorization: Token a1b2c3```"
-                    }, {
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con nueva password",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/Password"}
-                    }],
-                    "responses": {
-                        "201": {
-                            "description": "Password changed. New token generated",
-                            "schema": {"$ref": "#/definitions/Token"}
+                        "max_coordinates": {
+                            "$ref": "#/definitions/Coordinates",
+                            "description": "Top-Right coordinates of the Quadrant square."
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"web_token": []}]
-                }
-            },
-            "/web/get_token": {
-                "post": {
-                    "tags": ["web"],
-                    "summary": "Obtener token de usuario web a partir de credenciales",
-                    "consumes": ["application/json"],
-                    "parameters": [{
-                        "in": "body",
-                        "name": "json",
-                        "description": "JSON con usuario y contrase\u00f1a",
-                        "required": true,
-                        "schema": {"$ref": "#/definitions/WebUserAuth"}
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "Web user authenticated correctly",
-                            "schema": {"$ref": "#/definitions/Token"}
-                        }, "403": {"description": "Invalid JSON ocheme or credentials"}
-                    }
-                }
-            },
-            "/map/quadrant_reports/": {
-                "get": {
-                    "tags": ["mobile", "web", "general"],
-                    "summary": "Retorna tajadas de tiempo de agregaci\u00f3n de reportes a cuadrantes.",
-                    "description": "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen. . \n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```",
-                    "operationId": "getQuadrantReportSlices",
-                    "produces": ["application/json"],
-                    "parameters": [{
-                        "name": "Token",
-                        "in": "header",
-                        "required": true,
-                        "type": "string",
-                        "description": "Token de usuario m\u00f3vil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-                    }, {
-                        "in": "query",
-                        "name": "min_lat",
-                        "description": "Minima latitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "max_lat",
-                        "description": "Maxima latitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "min_long",
-                        "description": "Minima longitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "max_long",
-                        "description": "Maxima longitud expresada en decimal. Ejemplo, ```10.00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "start_timestamp",
-                        "description": "Hora y d\u00eda del evento desde el que se agregan los sismos. Ejemplo, ```1997-07-16T19:20+01:00```",
-                        "type": "string",
-                        "required": true
-                    }, {
-                        "in": "query",
-                        "name": "end_timestamp",
-                        "description": "Hora y d\u00eda del evento hasta el que se agregan los sismos. Ejemplo, ```2756-07-16T19:20+01:00```",
-                        "type": "string",
-                        "required": true
-                    }],
-                    "responses": {
-                        "200": {
-                            "description": "OK",
-                            "schema": {"type": "array", "items": {"$ref": "#/definitions/QuadrantReportSlice"}}
+                        "map_relative_pos_x": {
+                            "type": "integer",
+                            "example": 0,
+                            "description": "Relative horizontal distance of the quadrant to the origin (Bottom-Left of Chile)"
                         },
-                        "403": {"description": "Invalid mobile user credential (token)"},
-                        "400": {"description": "Invalid JSON scheme"}
-                    },
-                    "security": [{"mobile_token": []}]
-                }
-            }
-        },
-        "securityDefinitions": {
-            "mobile_token": {"type": "apiKey", "name": "Token", "in": "header"},
-            "web_token": {"type": "apiKey", "name": "Token", "in": "header"},
-            "any_token": {"type": "apiKey", "name": "Token", "in": "header"}
-        },
-        "definitions": {
-            "EventType": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 110,
-                        "description": "Event (Threat or Emergency) id"
-                    }, "title": {"type": "string", "example": "Restos vegetales en el suelo"}
-                }
-            },
-            "Coordinates": {
-                "type": "object",
-                "properties": {
-                    "latitude": {"type": "number", "format": "float", "example": -70.666667},
-                    "longitude": {"type": "number", "format": "float", "example": -33.45}
-                }
-            },
-            "ReportComplete": {
-                "type": "object",
-                "properties": {
-                    "coordinates": {"$ref": "#/definitions/Coordinates"},
-                    "intensity": {"type": "integer", "description": "Not required", "minimum": 1, "maximum": 12},
-                    "created_on": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Not required but suggested; ISO 8601 specification",
-                        "example": "2018-04-20T16:20+01:00"
+                        "map_relative_pos_y": {
+                            "type": "integer",
+                            "example": 1,
+                            "description": "Relative vertical distance of the quadrant to the origin (Bottom-Left of Chile)"
+                        }
+                    }
+                },
+                "SliceData": {
+                    "type": "object",
+                    "properties": {
+                        "start_timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 specification",
+                            "example": "2018-04-20T16:20+01:00"
+                        },
+                        "end_timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 specification",
+                            "example": "2018-04-20T16:20+01:00"
+                        },
+                        "report_total_count": {
+                            "type": "integer",
+                            "description": "Total number of reports in Quadrant Slice.",
+                            "example": 100
+                        },
+                        "report_w_intensity_count": {
+                            "type": "integer",
+                            "description": "Total number of report with not-NULL intensity in Quadrant Slice.",
+                            "example": 20
+                        },
+                        "intensity_sum": {
+                            "type": "integer",
+                            "description": "Addition of all the not-NULL intensities of the reports in the Quadrant slice.",
+                            "example": 100
+                        },
+                        "points_sum": {
+                            "type": "integer",
+                            "description": "Notion of confidence of the slice. Is the adition of the points of all users whom reported in the quadrant section",
+                            "example": 421
+                        }
                     }
                 }
             },
-            "Intensity": {
-                "type": "object",
-                "properties": {
-                    "intensity": {
-                        "type": "integer",
-                        "default": null,
-                        "example": 6,
-                        "minimum": 1,
-                        "maximum": 12
-                    }
-                }
-            },
-            "PostResponseReport": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer", "description": "report id"},
-                    "coordinates": {"$ref": "#/definitions/Coordinates"},
-                    "intensity": {
-                        "type": "integer",
-                        "description": "Not required",
-                        "default": null,
-                        "example": 5,
-                        "minimum": 1,
-                        "maximum": 12
-                    },
-                    "created_on": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Not required but suggested; ISO 8601 specification",
-                        "example": "2018-04-20T16:20+01:00"
-                    }
-                }
-            },
-            "ReportEvent": {
-                "type": "object",
-                "properties": {
-                    "type": {"type": "integer", "description": "threat or emergency type id", "example": 21},
-                    "report": {"type": "integer", "description": "report id", "example": 110}
-                }
-            },
-            "ExpandedReportEvent": {
-                "type": "object",
-                "properties": {
-                    "type": {"type": "integer", "description": "threat or emergency type id", "example": 7},
-                    "report": {"$ref": "#/definitions/ReportComplete"}
-                }
-            },
-            "Challenge": {
-                "type": "object",
-                "properties": {
-                    "h": {
-                        "type": "string",
-                        "description": "response to challenge in exchange for a new mobile user",
-                        "example": "a1b2cv3"
-                    }
-                }
-            },
-            "Token": {
-                "type": "object",
-                "properties": {
-                    "token": {
-                        "type": "string",
-                        "description": "brand new mobile user's Token. Save it carefully.",
-                        "example": "a1b2cv3"
-                    }
-                }
-            },
-            "Nonce": {"type": "object", "properties": {"key": {"type": "string", "example": "a1b2cv3"}}},
-            "Password": {"type": "object", "properties": {"password": {"type": "string", "minLength": 8}}},
-            "WebUserAuth": {
-                "type": "object",
-                "properties": {
-                    "username": {"type": "string", "example": "juanito"},
-                    "password": {"type": "string", "example": "juanitosutsutsut"}
-                }
-            },
-            "Quake": {
-                "type": "object",
-                "properties": {
-                    "magnitude": {"type": "number", "format": "float", "example": 8.87},
-                    "depth": {"type": "number", "format": "float", "example": 300.34},
-                    "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 specification",
-                        "example": "2018-04-20T16:20+01:00"
-                    },
-                    "coordinates": {"$ref": "#/definitions/Coordinates"}
-                }
-            },
-            "QuadrantReportSlice": {
-                "type": "object",
-                "properties": {
-                    "quadrant_data": {"$ref": "#/definitions/Quadrant"},
-                    "slices_data": {"type": "array", "items": {"$ref": "#/definitions/SliceData"}}
-                }
-            },
-            "Quadrant": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer", "description": "Id of quadrant stored in DB."},
-                    "min_coordinates": {
-                        "$ref": "#/definitions/Coordinates",
-                        "description": "Bottom-Left coordinates of the Quadrant square."
-                    },
-                    "max_coordinates": {
-                        "$ref": "#/definitions/Coordinates",
-                        "description": "Top-Right coordinates of the Quadrant square."
-                    },
-                    "map_relative_pos_x": {
-                        "type": "integer",
-                        "example": 0,
-                        "description": "Relative horizontal distance of the quadrant to the origin (Bottom-Left of Chile)"
-                    },
-                    "map_relative_pos_y": {
-                        "type": "integer",
-                        "example": 1,
-                        "description": "Relative vertical distance of the quadrant to the origin (Bottom-Left of Chile)"
-                    }
-                }
-            },
-            "SliceData": {
-                "type": "object",
-                "properties": {
-                    "start_timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 specification",
-                        "example": "2018-04-20T16:20+01:00"
-                    },
-                    "end_timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 specification",
-                        "example": "2018-04-20T16:20+01:00"
-                    },
-                    "report_total_count": {
-                        "type": "integer",
-                        "description": "Total number of reports in Quadrant Slice.",
-                        "example": 100
-                    },
-                    "report_w_intensity_count": {
-                        "type": "integer",
-                        "description": "Total number of report with not-NULL intensity in Quadrant Slice.",
-                        "example": 20
-                    },
-                    "intensity_sum": {
-                        "type": "integer",
-                        "description": "Addition of all the not-NULL intensities of the reports in the Quadrant slice.",
-                        "example": 100
-                    }
-                }
-            }
-        },
-        "host": "virtserver.swaggerhub.com",
-        "basePath": "/Vichoko/sde/1.0.0",
-        "schemes": ["https", "http"]
-    };
+            "host": "virtserver.swaggerhub.com",
+            "basePath": "/Vichoko/sde/1.0.0",
+            "schemes": ["https", "http"]
+        };
 
-  // Build a system
-  const ui = SwaggerUIBundle({
-    spec: spec,
-    dom_id: '#swagger-ui',
-    deepLinking: true,
-    presets: [
-      SwaggerUIBundle.presets.apis,
-      SwaggerUIStandalonePreset
-    ],
-    plugins: [
-      SwaggerUIBundle.plugins.DownloadUrl
-    ],
-    layout: "StandaloneLayout"
-  });
+        // Build a system
+        const ui = SwaggerUIBundle({
+            spec: spec,
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout"
+        });
 
-  window.ui = ui
-}
+        window.ui = ui
+    }
 </script>
 </body>
 

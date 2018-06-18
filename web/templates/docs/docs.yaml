@@ -1,4 +1,4 @@
-swagger: '2.0'
+﻿swagger: '2.0'
 info:
   description: |
     API for Sismoide.
@@ -89,7 +89,7 @@ paths:
           description: Invalid JSON scheme
       security:
       - mobile_token: []
-  /mobile/nearby_reports:
+  /mobile/nearbyreports:
     get:
       tags:
         - mobile
@@ -141,7 +141,7 @@ paths:
           description: Invalid JSON scheme
       security:
       - mobile_token: []
-  /mobile/nearby_quakes:
+  /mobile/nearbyquakes:
     get:
       tags:
         - mobile
@@ -192,125 +192,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Quake'
-        403:
-          description: Invalid mobile user credential (token)
-        400:
-          description: Invalid JSON scheme
-      security:
-      - mobile_token: []
-  /mobile/nearby_emergencies:
-    get:
-      deprecated: True
-      tags:
-        - mobile
-      summary: Retorna reportes de emergencia cercanos a un momento y lugar
-      description: "retorna emergencias emitidas cercanos a un momento y lugar.  El area que se calcula es un cuadrado de largo 2rad. \n Ejemplo sintaxis:\n ```/mobile/nearby_quakes?latitude={lat}&longitude={long}&rad={radium}&start={start_time}&end={end_time}```"
-      operationId: getNearbyEmergencies
-      produces:
-        - "application/json"
-      parameters:
-      - name: Token
-        in: header
-        # todo: descomentar
-        required: true
-        type: string
-        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-      - in: query
-        name: latitude
-        description: "Latitud expresada en decimal. Ejemplo, ```10.00```"
-        type: string
-        required: true
-      - in: query
-        name: longitude
-        description: "Longitud expresada en decimal. Ejemplo, ```10.00```"
-        type: string
-        required: true
-      - in: query
-        name: rad
-        required: true
-        description: "Radio en kilómetros expresada en decimal. Ejemplo, ```10.00```"
-        type: string
-      - in: query
-        name: start
-        description: "Hora y día desde el que se agregan los reportes de emergencia. Ejemplo, ```1997-07-16T19:20+01:00```"
-        type: string
-      - in: query
-        name: end
-        description: "Hora y día del evento hasta el que se agregan los reportes de emergencia. Ejemplo, ```2756-07-16T19:20+01:00```"
-        type: string
-      responses:
-        200:
-          description: "OK"
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ExpandedReportEvent'
-        403:
-          description: Invalid mobile user credential (token)
-        400:
-          description: Invalid JSON scheme
-      security:
-      - mobile_token: []
-  /mobile/threats:
-    post:
-      tags:
-      - mobile
-      summary: Agregar nueva amenaza a un reporte.
-      operationId: addThreat
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      parameters:
-      - name: Token
-        in: header
-        required: true
-        type: string
-        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-      - in: body
-        name: json
-        description: JSON con id de tipo de amenaza y del reporte al que se agregará.
-        required: true
-        schema:
-          $ref: '#/definitions/ReportEvent'
-      responses:
-        201:
-          description: Threat submitted
-          schema:
-            $ref: '#/definitions/ReportEvent'
-        403:
-          description: Invalid mobile user credential (token)
-        400:
-          description: Invalid JSON scheme
-      security:
-      - mobile_token: []
-  /mobile/emergencies:
-    post:
-      tags:
-      - mobile
-      summary: Agregar nueva emergencia a un reporte
-      operationId: addEmergency
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      parameters:
-      - name: Token
-        in: header
-        required: true
-        type: string
-        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
-      - in: body
-        name: json
-        description: JSON con id de tipo de emergencia y del reporte al que se agregará
-        required: true
-        schema:
-          $ref: '#/definitions/ReportEvent'
-      responses:
-        201:
-          description: Emergency submitted
-          schema:
-            $ref: '#/definitions/ReportEvent'
         403:
           description: Invalid mobile user credential (token)
         400:
@@ -500,7 +381,7 @@ paths:
         - web
         - general
       summary: Retorna tajadas de tiempo de agregación de reportes a cuadrantes.
-      description: "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen. . \n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat&}min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```"
+      description: "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat}&min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```"
       operationId: getQuadrantReportSlices
       produces:
         - "application/json"
@@ -510,7 +391,7 @@ paths:
         # todo: descomentar
         required: true
         type: string
-        description: "Token de usuario móvil obtenido de recursos Nonce/Challenge. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+        description: "Token de usuario móvil o web. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
       - in: query
         name: min_lat
         description: "Minima latitud expresada en decimal. Ejemplo, ```10.00```"
@@ -766,6 +647,10 @@ definitions:
         type: integer
         description: Addition of all the not-NULL intensities of the reports in the Quadrant slice.
         example: 100
+      points_sum:
+        type: integer
+        description: Notion of confidence of the slice. Is the adition of the points of all users whom reported in the quadrant section
+        example: 421
 
 # Added by API Auto Mocking Plugin
 host: virtserver.swaggerhub.com

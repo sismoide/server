@@ -5,16 +5,22 @@ Usage:
     python swagger-yaml-to-html.py < /path/to/api.yaml > doc.html
 
 """
-import yaml, json, sys
+import json
+import sys
+
+import yaml
 
 TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Swagger UI</title>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui.css" >
+    {%% load static %%}
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700"
+          rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{%% static "swagger-ui.css" %%}">
+  
   <style>
     html
     {
@@ -39,8 +45,8 @@ TEMPLATE = """
 
 <div id="swagger-ui"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui-bundle.js"> </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.2.2/swagger-ui-standalone-preset.js"> </script>
+<script src="{%% static "swagger-ui-bundle.js" %%}"> </script>
+<script src="{%% static "swagger-ui-standalone-preset.js" %%}"> </script>
 <script>
 window.onload = function() {
 
@@ -68,6 +74,5 @@ window.onload = function() {
 
 </html>
 """
-
 spec = yaml.load(sys.stdin)
-sys.stdout.write(TEMPLATE % json.dumps(spec))
+sys.stdout.write(TEMPLATE % str(json.dumps(spec, ensure_ascii=False)))
