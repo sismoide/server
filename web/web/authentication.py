@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import HTTP_HEADER_ENCODING, exceptions
 
 from mobile_res.models import MobileUser
-from web.settings import MOBILE_PATH_PREFIX
+from web.settings import MOBILE_PATH_PREFIX, MAP_PATH_PREFIX
 from web_res.models import WebUser
 
 
@@ -119,8 +119,8 @@ class TokenAuthentication(BaseAuthentication):
                 raise exceptions.AuthenticationFailed(_('User not mobile neither web.'))
 
         if is_mobile:
-            if MOBILE_PATH_PREFIX not in self.request.path:
-                raise exceptions.AuthenticationFailed(_('Mobile user is restricted to mobile resources.'))
+            if MOBILE_PATH_PREFIX not in self.request.path and MAP_PATH_PREFIX not in self.request.path:
+                raise exceptions.AuthenticationFailed(_('Mobile user is restricted to mobile and map resources.'))
         return token.user, token
 
     def authenticate_header(self, request):

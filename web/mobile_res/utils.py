@@ -6,8 +6,7 @@ from math import cos, radians
 from lxml import etree
 
 from map.models import Coordinates
-
-from web.settings import BASE_DIR
+from web.settings import QUAKEML_DIR
 
 
 def random_username():
@@ -45,12 +44,12 @@ def get_quakes():
     from mobile_res.models import Quake
 
     # location of QuakeML files
-    loc = os.path.join(BASE_DIR, 'mobile_res', 'qmls')
-    files = os.listdir(path=loc)
+    files = os.listdir(path=QUAKEML_DIR)
 
     # process all files in folder
     for file in files:
-        eventid, latitude, longitude, depth, magnitude, timestamp, creation_time = qmlparse(os.path.join(loc, file))
+        eventid, latitude, longitude, depth, magnitude, timestamp, creation_time = qmlparse(
+            os.path.join(QUAKEML_DIR, file))
 
         coords = Coordinates.objects.create(
             latitude=latitude,
@@ -85,7 +84,7 @@ def get_quakes():
 
     # remove all QuakeML files
     for file in files:
-        file_path = os.path.join(loc, file)
+        file_path = os.path.join(QUAKEML_DIR, file)
         try:
             if os.path.isfile(file_path):
                 os.remove(file_path)
@@ -129,3 +128,23 @@ def get_start_and_end_dates(request):
     start_date = get_date_from_request(request, 'start', "1918-01-01T00:00")
     end_date = get_date_from_request(request, 'end', "2100-12-31T23:59")
     return start_date, end_date
+
+
+def add_points_to_user(user, points):
+    """
+    Add points to user.
+    :param user: USER whom the points are going to be added.
+    :param points: ammount of points (integer) to be added.
+    :return:
+    """
+    # local import to avoid circular reference error
+    from mobile_res.models import MobileUser
+
+    try:
+        m = MobileUser.objects.get(user=user)
+        m.points += points
+        m.save()
+        return 0
+    except MobileUser.DoesNotExist:
+        print("warning: Mobile user not found for auth user. Avoiding points increase.")
+        return -1
