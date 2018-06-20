@@ -574,7 +574,7 @@ class NearbyReportsTests(APITestCase):
                 'rad': '200',
                 'start': (timezone.now()-timezone.timedelta(days=15)).strftime("%Y-%m-%dT%H:%M"),
                 'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
-        response = self.client.get(url, data)
+        response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)
 
