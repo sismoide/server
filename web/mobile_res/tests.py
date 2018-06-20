@@ -544,6 +544,16 @@ class NearbyReportsTests(APITestCase):
             coordinates=cls.coord5,
             intensity=8
         )
+        cls.rep6 = Report.objects.create(
+            coordinates=cls.coord2,
+            intensity=7,
+            created_on=timezone.now()-timezone.timedelta(hours=1)
+        )
+        cls.rep7 = Report.objects.create(
+            coordinates=cls.coord2,
+            intensity=5,
+            created_on=timezone.now()-timezone.timedelta(days=1000)
+        )
 
         cls.lim_rep1 = Report.objects.create(
             coordinates=cls.lim_coord1,
@@ -555,7 +565,19 @@ class NearbyReportsTests(APITestCase):
         data = {'latitude': '50.0', 'longitude': '50.0', 'rad': '200'}
         response = self.client.get(url, data, HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data), 5)
+
+    def test_date_filter(self):
+        url = reverse('mobile_res:nearby-reports-list')
+        data = {'latitude': '50.0',
+                'longitude': '50.0',
+                'rad': '200',
+                'start': (timezone.now()-timezone.timedelta(days=15)).strftime("%Y-%m-%dT%H:%M"),
+                'end': timezone.now().strftime("%Y-%m-%dT%H:%M")}
+        response = self.client.get(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
+
 
     @skip
     def test_limit_coords(self):
