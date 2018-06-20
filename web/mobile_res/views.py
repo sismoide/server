@@ -11,8 +11,6 @@ from mobile_res.utils import get_limits, get_start_and_end_dates, add_points_to_
 from web.settings import HASH_CLASS, MOBILE_USER_POINTS_REPORT_SUBMIT, MOBILE_USER_POINTS_INTENSITY_UPDATE
 from web_res.serializers import NonceSerializer, ChallengeSerializer, ReportSerializer
 
-from web_res.views import getdates
-
 
 class ReportViewSet(mixins.CreateModelMixin,
                     mixins.UpdateModelMixin,
@@ -158,7 +156,7 @@ class NearbyReportsList(mixins.ListModelMixin,
     def list(self, request, *args, **kwargs):
         try:
             min_lat, max_lat, min_long, max_long = get_limits(request)
-            start_date, end_date = getdates(request)
+            start_date, end_date = get_start_and_end_dates(request)
         except ValueError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
