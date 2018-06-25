@@ -102,3 +102,21 @@ class ReportQuadrantAggregationSlice(models.Model):
     report_w_intensity_count = models.IntegerField(default=0)
     intensity_sum = models.IntegerField(default=0)
     points_sum = models.IntegerField(default=0)
+
+
+class LandmarkType(models.Model):
+    name = models.CharField(max_length=128, primary_key=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Landmark(models.Model):
+    name = models.TextField()
+    address = models.TextField(blank=True, null=True)
+    coordinates = models.ForeignKey(Coordinates, blank=True, null=True, on_delete=models.CASCADE)
+    type = models.ForeignKey(LandmarkType, on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return "[{}] {}".format(self.type, self.name)

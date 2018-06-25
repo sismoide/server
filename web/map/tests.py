@@ -5,7 +5,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from map.models import Coordinates, Quadrant, ReportQuadrantAggregationSlice
+from map.models import Coordinates, Quadrant, ReportQuadrantAggregationSlice, LandmarkType, Landmark
 from map.serializers import CoordinatesSerializer, QuadrantSerializer
 from mobile_res.models import Report
 from web.settings import MAP_PATH_PREFIX
@@ -411,3 +411,155 @@ class QuadrantsTestCase(APITestCase):
                                    HTTP_AUTHORIZATION="Token {}".format(self.token.key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
+
+
+class LandmarksTestCase(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.token = WebUser.objects.create_web_user('test_user').token
+        cls.create_landmarks(cls)
+
+    def create_landmarks(self):
+        self.l_t1 = LandmarkType.objects.create(name="test_landmark_type_1")
+        self.l_t2 = LandmarkType.objects.create(name="test_landmark_type_2")
+        self.l0 = Landmark.objects.create(
+            name="test_landmark_0",
+            address="test_address_0",
+            coordinates=Coordinates.objects.create(
+                latitude=-1,
+                longitude=-1
+            ),
+            type=self.l_t1
+        )
+        self.l1 = Landmark.objects.create(
+            name="test_landmark_1",
+            address="test_address_1",
+            coordinates=Coordinates.objects.create(
+                latitude=1,
+                longitude=1
+            ),
+            type=self.l_t2
+        )
+        self.l2 = Landmark.objects.create(
+            name="test_landmark_2",
+            address="test_address_2",
+            coordinates=Coordinates.objects.create(
+                latitude=2,
+                longitude=2
+            ),
+            type=self.l_t1
+        )
+        self.l3 = Landmark.objects.create(
+            name="test_landmark_3",
+            address="test_address_3",
+            coordinates=Coordinates.objects.create(
+                latitude=3,
+                longitude=3
+            ),
+            type=self.l_t2
+        )
+
+    def test_retrieve_landmarks_by_coordinate(self):
+        url = reverse('map:landmark-list')
+        data = {
+            'min_lat': 0,
+            'min_long': 0,
+            'max_lat': 1,
+            'max_long': 1
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(1, len(response.data))
+        self.assertEqual(self.l1.name, response.data[0]['name'])
+        self.assertEqual(self.l1.address, response.data[0]['address'])
+        self.assertAlmostEqual(self.l1.coordinates.latitude, float(response.data[0]['coordinates']['latitude']))
+        self.assertAlmostEqual(self.l1.coordinates.longitude, float(response.data[0]['coordinates']['longitude']))
+        self.assertEqual(self.l1.type.name, response.data[0]['type'])
+
+        data = {
+            'min_lat': 1,
+            'min_long': 1,
+            'max_lat': 2,
+            'max_long': 2
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(2, len(response.data))
+        data = {
+            'min_lat': -1,
+            'min_long': -1,
+            'max_lat': 2,
+            'max_long': 2
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(3, len(response.data))
+
+        data = {
+            'min_lat': -1,
+            'min_long': -1,
+            'max_lat': 3,
+            'max_long': 3
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(4, len(response.data))
+
+    def test_retrieve_landmarks_by_landmarktype_coord(self):
+        url = reverse('map:landmark_type-list')
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        landmarks = response.data
+
+        self.assertEqual(2, len(landmarks))
+
+        url = reverse('map:landmark-list')
+        data = {
+            'type': landmarks[0]['name']
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(0, len(response.data))
+        data = {
+            'type': landmarks[0]['name'],
+            'min_lat': -9999,
+            'min_long': -9999,
+            'max_lat': 9999,
+            'max_long': 9999
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(2, len(response.data))
+
+        data = {
+            'type': landmarks[1]['name'],
+            'min_lat': -9999,
+            'min_long': -9999,
+            'max_lat': 9999,
+            'max_long': 9999
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(2, len(response.data))
+
+        data = {
+            'type': self.l_t1,
+            'min_lat': -1,
+            'min_long': -1,
+            'max_lat': 0,
+            'max_long': 0
+        }
+        response = self.client.get(url, data,
+                                   HTTP_AUTHORIZATION="Token {}".format(self.token.key))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(1, len(response.data))
+        self.assertEqual(self.l0.name, response.data[0]['name'])

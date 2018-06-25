@@ -157,8 +157,8 @@ class NearbyReportsList(mixins.ListModelMixin,
         try:
             min_lat, max_lat, min_long, max_long = get_limits(request)
             start_date, end_date = get_start_and_end_dates(request)
-        except ValueError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({"status": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             # add 1 minute to end_date because seconds were truncated from request
             end_date = end_date + timezone.timedelta(minutes=1)
