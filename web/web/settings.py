@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'i7r2tyl572bx2xa-5(6s*x#pcq-)y9bxk(%ro++lz9)&@t46nj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -151,7 +151,7 @@ REST_FRAMEWORK = {
         'reports': '20/day',  # todo: change to 1 per minute in production
         'events': '20/day',
         'mobile-read': '8/minute',
-        'anon': '12/hour',
+        'anon': '12/minute',
     }
 }
 
