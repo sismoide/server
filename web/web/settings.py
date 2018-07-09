@@ -26,6 +26,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -161,7 +163,6 @@ MOBILE_PATH_PREFIX = 'mobile'
 WEB_PATH_PREFIX = 'web'
 MAP_PATH_PREFIX = 'map'
 
-CORS_ORIGIN_ALLOW_ALL = True
 
 QUADRANT_LONG_DELTA = 0.054  # ~5km west-east center of Chile
 QUADRANT_LAT_DELTA = 0.045  # ~5km north-south center of Chile
