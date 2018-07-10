@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
             # forbid reports around beauchef
             forbidden_zone_min_lat = -33.488
-            forbidden_zone_max_lat = -33.443
+            forbidden_zone_max_lat = -33.42
             forbidden_zone_min_long = -70.72
             forbidden_zone_max_long = -70.59
 
