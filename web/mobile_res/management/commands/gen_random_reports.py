@@ -14,20 +14,21 @@ class Command(BaseCommand):
         while True:
 
             # sample coordinates normal
-            lat_mu, lat_sigma = -36.75, 5
-            long_mu, long_sigma = -88.3, 4
+            lat_mu, lat_sigma = -33.4378305, 4
+            long_mu, long_sigma = -70.650449, 4
 
             lat = np.random.normal(lat_mu, lat_sigma)
             long = np.random.normal(long_mu, long_sigma)
 
             # forbid reports around beauchef
-            forbidden_zone_min_lat = -33.480
-            forbidden_zone_max_lat = -33.449
-            forbidden_zone_min_long = -70.693
-            forbidden_zone_max_long = -70.643
+            forbidden_zone_min_lat = -33.488
+            forbidden_zone_max_lat = -33.44
+            forbidden_zone_min_long = -70.72
+            forbidden_zone_max_long = -70.63
 
             if forbidden_zone_min_lat < lat < forbidden_zone_max_lat:
                 if forbidden_zone_min_long < long < forbidden_zone_max_long:
+                    print('info: omitted a report close to beauchef')
                     continue
 
             intens = None
