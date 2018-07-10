@@ -22,9 +22,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'i7r2tyl572bx2xa-5(6s*x#pcq-)y9bxk(%ro++lz9)&@t46nj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+    'geoscopio.dgf.uchile.cl',
+    'server-geoscopio.dgf.uchile.cl',
+)
 
 # Application definition
 
@@ -41,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -150,7 +157,7 @@ REST_FRAMEWORK = {
         'reports': '20/day',  # todo: change to 1 per minute in production
         'events': '20/day',
         'mobile-read': '8/minute',
-        'anon': '12/hour',
+        'anon': '12/minute',
     }
 }
 
@@ -160,7 +167,6 @@ MOBILE_PATH_PREFIX = 'mobile'
 WEB_PATH_PREFIX = 'web'
 MAP_PATH_PREFIX = 'map'
 
-CORS_ORIGIN_ALLOW_ALL = True
 
 QUADRANT_LONG_DELTA = 0.054  # ~5km west-east center of Chile
 QUADRANT_LAT_DELTA = 0.045  # ~5km north-south center of Chile

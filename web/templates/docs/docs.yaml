@@ -380,7 +380,8 @@ paths:
         - mobile
         - web
         - general
-      summary: Retorna tajadas de tiempo de agregación de reportes a cuadrantes.
+        - map
+      summary: Retorna tajadas de tiempo de agregación de reportes a cuadrantes
       description: "Retorna los reportes acumulados entre los rangos de tiempo y coordenadas especificados, asociados al cuadrante al que pertenecen.\n La granularidad minima de tajadas de tiempo es de 5 minutos. \n\n Ejemplo sintaxis:\n ```/map/quadrant_reports?min_lat={lat}&max_lat={lat}&min_long={long}&max_long={long}&start_timestamp={start_time}&end_timestamp={end_time}```"
       operationId: getQuadrantReportSlices
       produces:
@@ -435,6 +436,96 @@ paths:
           description: Invalid JSON scheme
       security:
       - mobile_token: []
+      - web_token: []
+  /map/landmark_types/:
+    get:
+      tags:
+        - mobile
+        - web
+        - general
+        - map
+      summary: Retorna tipos de hito que se pueden localizar en el mapa
+      description: "Retorna los tipos de edificaciones que se pueden localizar en el mapa. \n\n Ejemplo sintaxis:\n ```/map/landmark_types/```"
+      operationId: getLandmarkTypes
+      produces:
+        - "application/json"
+      parameters:
+      - name: Token
+        in: header
+        # todo: descomentar
+        required: true
+        type: string
+        description: "Token de usuario móvil o web. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/LandmarkType'
+        403:
+          description: Invalid mobile user credential (token)
+      security:
+      - mobile_token: []
+      - web_token: []
+  /map/landmarks/:
+    get:
+      tags:
+        - mobile
+        - web
+        - general
+        - map
+      summary: Retorna localizacion de hitos marcados en el mapa
+      description: "Retorna localizacion e informacion de hitos localizables en el mapa, dado una serie de filtros, requeridos y opcionales. \n\n Ejemplo sintaxis:\n ```/map/land_marks?min_lat={lat}&max_lat={lat}&min_long={long}&max_long={long}(&type={landmark_type})```"
+      operationId: getLandmarks
+      produces:
+        - "application/json"
+      parameters:
+      - name: Token
+        in: header
+        # todo: descomentar
+        required: true
+        type: string
+        description: "Token de usuario móvil o web. \n Ejemplo:\n ```Authorization: Token a1b2c3d4e5```  "
+      - in: query
+        name: min_lat
+        description: "Minima latitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: max_lat
+        description: "Maxima latitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: min_long
+        description: "Minima longitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: max_long
+        description: "Maxima longitud expresada en decimal. Ejemplo, ```10.00```"
+        type: string
+        required: true
+      - in: query
+        name: type
+        description: "(opcional; si no esta se incluyen TODOS LOS TIPOS) Tipo de hito a filtrar. Obtenible por medio de recurso ```/map/landmark_types/``` Ejemplo, ```cuartel de bomberos```"
+        type: string
+
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Landmark'
+        403:
+          description: Invalid mobile user credential (token)
+        400:
+          description: Invalid JSON scheme
+      security:
+      - mobile_token: []
+      - web_token: []
 
 securityDefinitions:
   mobile_token:
@@ -452,6 +543,39 @@ securityDefinitions:
 
 
 definitions:
+  LandmarkType:
+    type: object
+    properties:
+      name:
+        type: string
+        example: cuartel de bomberos
+        description: landmark type name
+      description:
+        type: string
+        example: "engloba todo tipo de institucion en la que hayan bomberos"
+        description: detailed description of the landmark type. Can be null.
+  Landmark:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+        description: landmark unique id
+      name:
+        type: string
+        example: SAPU Anibal Aristia
+        description: landmark name
+      address:
+        type: string
+        example: Av. Alameda, 1136
+        description: landmark's postal address
+      type:
+        type: string
+        example: centro de salud de atencion primaria
+        description: name of the type of landmark this one belongs
+      coordinates:
+        $ref: '#/definitions/Coordinates'
+
   EventType:
     type: object
     properties:

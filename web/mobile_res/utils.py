@@ -44,7 +44,11 @@ def get_quakes():
     from mobile_res.models import Quake
 
     # location of QuakeML files
-    files = os.listdir(path=QUAKEML_DIR)
+    try:
+        files = os.listdir(path=QUAKEML_DIR)
+    except FileNotFoundError as e:
+        print("warning: {}".format(e))
+        return -1
 
     # process all files in folder
     for file in files:

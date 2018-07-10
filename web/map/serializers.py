@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from map.models import Coordinates, Quadrant, ReportQuadrantAggregationSlice
+from map.models import Coordinates, Quadrant, ReportQuadrantAggregationSlice, Landmark, LandmarkType
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):
@@ -35,4 +35,16 @@ class QuadrantSerializer(serializers.ModelSerializer):
         fields = ('min_coordinates', 'max_coordinates', 'map_relative_pos_x', 'map_relative_pos_y', )
 
 
+class LandmarkSerializer(serializers.ModelSerializer):
+    coordinates = CoordinatesSerializer()
+    type = serializers.StringRelatedField()
 
+    class Meta:
+        model = Landmark
+        fields = '__all__'
+
+
+class LandmarkTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LandmarkType
+        fields = '__all__'
