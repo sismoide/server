@@ -14,8 +14,8 @@ class Command(BaseCommand):
         while True:
 
             # sample coordinates normal
-            lat_mu, lat_sigma = -33.4378305, 0.5
-            long_mu, long_sigma = -70.650449, 0.5
+            lat_mu, lat_sigma = -33.4378305, 0.3
+            long_mu, long_sigma = -70.650449, 0.2
 
             lat = np.random.normal(lat_mu, lat_sigma)
             long = np.random.normal(long_mu, long_sigma)
